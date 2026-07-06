@@ -1,0 +1,73 @@
+import type { CompanyStatus, EventKind } from '../types'
+
+/** ステータスバッジの配色（Tailwind の purge を避けるため hex を直接持つ） */
+export const STATUS_STYLES: Record<CompanyStatus, { fg: string; bg: string }> = {
+  応募予定: { fg: '#5A6B84', bg: '#EEF2F7' },
+  ES提出中: { fg: '#1E4FD6', bg: '#EBF1FE' },
+  ES結果待ち: { fg: '#C07C1B', bg: '#FCF3E3' },
+  ES通過: { fg: '#0F9B6C', bg: '#E7F6F0' },
+  Webテスト: { fg: '#0B8A80', bg: '#E2F4F2' },
+  Webテスト結果待ち: { fg: '#C07C1B', bg: '#FCF3E3' },
+  面接予定: { fg: '#1E4FD6', bg: '#EBF1FE' },
+  面接結果待ち: { fg: '#C07C1B', bg: '#FCF3E3' },
+  内定: { fg: '#FFFFFF', bg: '#0F9B6C' },
+  不合格: { fg: '#8896AC', bg: '#F1F4F8' },
+}
+
+/** カレンダー・予定リストの色分け */
+export const KIND_STYLES: Record<EventKind, { main: string; fg: string; bg: string }> = {
+  締切: { main: '#E2554D', fg: '#E2554D', bg: '#FDEDEC' },
+  面接: { main: '#2F6BEF', fg: '#2F6BEF', bg: '#EBF1FE' },
+  Webテスト: { main: '#0F9B6C', fg: '#0B8A80', bg: '#E2F4F2' },
+  その他: { main: '#D9A400', fg: '#A67E00', bg: '#FBF5DC' },
+}
+
+/** 選考フローに追加できるステップのプリセット（自由入力も可能） */
+export const FLOW_PRESETS = [
+  'ES',
+  'Webテスト：SPI',
+  'Webテスト：玉手箱',
+  'Webテスト：TG-WEB',
+  'SPI：テストセンター',
+  'GD',
+  '一次面接',
+  '二次面接',
+  '三次面接以降',
+  '最終面接',
+  '動画',
+  '面談',
+  'その他',
+] as const
+
+export const SCHEDULE_TYPE_PRESETS = [
+  '面接',
+  'Webテスト',
+  '説明会',
+  '面談',
+  'OB・OG訪問',
+  'その他',
+] as const
+
+export const INDUSTRIES = [
+  'IT・通信',
+  'メーカー',
+  '総合商社',
+  '金融',
+  'コンサル',
+  '広告・メディア',
+  'インフラ',
+  '食品',
+  'その他',
+] as const
+
+/** インターン期間カレンダーで企業ごとに割り当てる色 */
+export const INTERNSHIP_PALETTE = [
+  '#2F6BEF',
+  '#0F9B6C',
+  '#C07C1B',
+  '#8B5CF6',
+  '#E2554D',
+  '#0B8A80',
+  '#D946A6',
+  '#6B7280',
+] as const

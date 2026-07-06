@@ -1,0 +1,123 @@
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+  updateDoc,
+  where,
+} from 'firebase/firestore'
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { emptyResearch } from '../data/seed'
+import { useAuth } from './useAuth'
+import { db } from '../lib/firebase'
+import type { Company, NewCompanyInput } from '../types'
+
+interface CompaniesStore {
+  companies: Company[]
+  loading: boolean
+  getCompany: (id: string) => Company | undefined
+  addCompany: (input: NewCompanyInput) => Promise<Company>
+  updateCompany: (id: string, updater: (c: Company) => Company) => void
+  removeCompany: (id: string) => void
+}
+
+const CompaniesContext = createContext<CompaniesStore | null>(null)
+
+const COLLECTION = 'companies'
+
+export function CompaniesProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth()
+  const [companies, setCompanies] = useState<Company[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // ログイン中のユーザーの企業データだけを、リアルタイムで購読する
+  useEffect(() => {
+    if (!user) {
+      setCompanies([])
+      setLoading(false)
+      return
+    }
+    setLoading(true)
+    const q = query(collection(db, COLLECTION), where('ownerId', '==', user.uid))
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const list = snapshot.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Company, 'id'>) }))
+        setCompanies(list)
+        setLoading(false)
+      },
+      (err) => {
+        console.error('企業データの取得に失敗しました', err)
+        setLoading(false)
+      },
+    )
+    return unsubscribe
+  }, [user])
+
+  const getCompany = (id: string) => companies.find((c) => c.id === id)
+
+  const addCompany = async (input: NewCompanyInput): Promise<Company> => {
+    if (!user) throw new Error('ログインしていません')
+    const flowLabels =
+      input.type === 'インターン'
+        ? ['応募', 'ES', '面接', '参加']
+        : ['ES', 'Webテスト', '一次面接', '最終面接', '内定']
+    const flow = flowLabels.map((label) => ({ id: crypto.randomUUID(), label }))
+    const base: Omit<Company, 'id'> = {
+      name: input.name,
+      industry: input.industry,
+      type: input.type,
+      title: input.title,
+      status: '応募予定',
+      memo: '',
+      mypageUrl: '',
+      loginId: '',
+      flow,
+      currentStepId: flow[0]?.id ?? null,
+      schedules: [],
+      deadlines: [],
+      esEntries: [],
+      interviews: [],
+      research: emptyResearch(),
+      internshipPeriods: [],
+      // Firestore 側にのみ持たせる、データの持ち主を示すフィールド
+      ownerId: user.uid,
+    } as Omit<Company, 'id'> & { ownerId: string }
+    const ref = await addDoc(collection(db, COLLECTION), base)
+    return { id: ref.id, ...base }
+  }
+
+  // 楽観的更新：Firestore への書き込みが完了する前に画面上は即座に反映する
+  const updateCompany = (id: string, updater: (c: Company) => Company) => {
+    const current = companies.find((c) => c.id === id)
+    if (!current) return
+    const next = updater(current)
+    setCompanies((prev) => prev.map((c) => (c.id === id ? next : c)))
+    const { id: _drop, ...rest } = next
+    updateDoc(doc(db, COLLECTION, id), rest).catch((err) => {
+      console.error('企業データの更新に失敗しました', err)
+    })
+  }
+
+  const removeCompany = (id: string) => {
+    setCompanies((prev) => prev.filter((c) => c.id !== id))
+    deleteDoc(doc(db, COLLECTION, id)).catch((err) => {
+      console.error('企業データの削除に失敗しました', err)
+    })
+  }
+
+  const value = useMemo(
+    () => ({ companies, loading, getCompany, addCompany, updateCompany, removeCompany }),
+    [companies, loading],
+  )
+
+  return <CompaniesContext.Provider value={value}>{children}</CompaniesContext.Provider>
+}
+
+export function useCompanies(): CompaniesStore {
+  const ctx = useContext(CompaniesContext)
+  if (!ctx) throw new Error('useCompanies は CompaniesProvider の内側で使用してください')
+  return ctx
+}
