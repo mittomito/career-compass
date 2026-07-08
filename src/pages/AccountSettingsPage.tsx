@@ -18,8 +18,8 @@ function toJapaneseError(code: string): string {
 }
 
 export default function AccountSettingsPage() {
-  const { user, deleteAccount } = useAuth()
-  const { removeAllCompanies } = useCompanies()
+  const { user, reauthenticate, deleteAccount } = useAuth()
+  const { removeAllCompanies, loading: companiesLoading } = useCompanies()
   const navigate = useNavigate()
   const [confirming, setConfirming] = useState(false)
   const [password, setPassword] = useState('')
@@ -31,12 +31,18 @@ export default function AccountSettingsPage() {
       setError('確認のため、パスワードを入力してください。')
       return
     }
+    if (companiesLoading) {
+      setError('データを読み込み中です。しばらくしてからもう一度お試しください。')
+      return
+    }
     setError('')
     setSubmitting(true)
     try {
-      // 先にデータを削除し、その後アカウント自体を削除する
+      // 必ず本人確認を先に行う。データ削除後に再認証が失敗すると、
+      // アカウントだけ残ってデータが消失するため、この順序を変えないこと
+      await reauthenticate(password)
       await removeAllCompanies()
-      await deleteAccount(password)
+      await deleteAccount()
       navigate('/')
     } catch (err) {
       const code = (err as { code?: string }).code ?? ''

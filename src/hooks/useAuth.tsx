@@ -19,7 +19,8 @@ interface AuthStore {
   register: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
-  deleteAccount: (password: string) => Promise<void>
+  reauthenticate: (password: string) => Promise<void>
+  deleteAccount: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthStore | null>(null)
@@ -53,15 +54,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await sendPasswordResetEmail(auth, email)
   }
 
-  const deleteAccount = async (password: string) => {
+  /** アカウント削除などの機微な操作の前に、パスワードで本人確認を行う */
+  const reauthenticate = async (password: string) => {
     if (!auth.currentUser || !auth.currentUser.email) throw new Error('ログインしていません')
     const credential = EmailAuthProvider.credential(auth.currentUser.email, password)
     await reauthenticateWithCredential(auth.currentUser, credential)
+  }
+
+  const deleteAccount = async () => {
+    if (!auth.currentUser) throw new Error('ログインしていません')
     await deleteUser(auth.currentUser)
   }
 
   const value = useMemo(
-    () => ({ user, loading, login, register, logout, resetPassword, deleteAccount }),
+    () => ({ user, loading, login, register, logout, resetPassword, reauthenticate, deleteAccount }),
     [user, loading],
   )
 
