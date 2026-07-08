@@ -123,8 +123,15 @@ export default function EsTab({ company }: { company: Company }) {
     setEditingId(null)
   }
 
-  const remove = (id: string) =>
-    updateCompany(company.id, (c) => ({ ...c, esEntries: c.esEntries.filter((e) => e.id !== id) }))
+  const remove = (entry: EsEntry) => {
+    // 回答本文は書き直しが難しいため、誤タップによる消失を確認ダイアログで防ぐ
+    const head = entry.question.length > 20 ? `${entry.question.slice(0, 20)}…` : entry.question
+    if (!window.confirm(`「${head}」を削除しますか？この操作は取り消せません。`)) return
+    updateCompany(company.id, (c) => ({
+      ...c,
+      esEntries: c.esEntries.filter((e) => e.id !== entry.id),
+    }))
+  }
 
   return (
     <SectionCard
@@ -204,7 +211,7 @@ export default function EsTab({ company }: { company: Company }) {
                       <button
                         type="button"
                         className="btn-text text-danger hover:bg-danger-soft"
-                        onClick={() => remove(e.id)}
+                        onClick={() => remove(e)}
                       >
                         <Trash2 size={13} />
                         削除

@@ -119,6 +119,15 @@ export default function InterviewTab({ company }: { company: Company }) {
     setOpenIds(next)
   }
 
+  const remove = (iv: { id: string; date: string }) => {
+    // 振り返りの記録は復元できないため、削除前に確認する
+    if (!window.confirm(`${fmtMD(iv.date)} の面接記録を削除しますか？この操作は取り消せません。`)) return
+    updateCompany(company.id, (c) => ({
+      ...c,
+      interviews: c.interviews.filter((x) => x.id !== iv.id),
+    }))
+  }
+
   const interviews = [...company.interviews].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   )
@@ -194,12 +203,7 @@ export default function InterviewTab({ company }: { company: Company }) {
                       <button
                         type="button"
                         className="btn-text text-danger hover:bg-danger-soft"
-                        onClick={() =>
-                          updateCompany(company.id, (c) => ({
-                            ...c,
-                            interviews: c.interviews.filter((x) => x.id !== iv.id),
-                          }))
-                        }
+                        onClick={() => remove(iv)}
                       >
                         <Trash2 size={13} />
                         この記録を削除
