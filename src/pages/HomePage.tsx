@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react'
 import EmptyState from '../components/common/EmptyState'
+import LoadingState from '../components/common/LoadingState'
 import CompanyCard from '../components/home/CompanyCard'
 import HomeToolbar, { type SortKey, type StatusFilter, type TypeFilter } from '../components/home/HomeToolbar'
+import OnboardingEmptyState from '../components/home/OnboardingEmptyState'
 import TodayStrip from '../components/home/TodayStrip'
 import { useCompanies } from '../hooks/useCompanies'
 import { nextDeadline, nextSchedule } from '../utils/events'
@@ -9,7 +11,7 @@ import { nextDeadline, nextSchedule } from '../utils/events'
 const FAR_FUTURE = 8_640_000_000_000_000 // 予定なしの企業を末尾に回すための番兵値
 
 export default function HomePage() {
-  const { companies } = useCompanies()
+  const { companies, loading } = useCompanies()
   const [query, setQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
   const [statuses, setStatuses] = useState<StatusFilter>([])
@@ -32,6 +34,14 @@ export default function HomePage() {
     if (sort === 'name') result.sort((a, b) => a.name.localeCompare(b.name, 'ja'))
     return result
   }, [companies, query, typeFilter, statuses, sort])
+
+  if (loading) {
+    return <LoadingState label="企業データを読み込み中…" />
+  }
+  
+  if (companies.length === 0) {
+    return <OnboardingEmptyState />
+  }
 
   return (
     <>

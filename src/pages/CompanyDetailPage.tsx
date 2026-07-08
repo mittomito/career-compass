@@ -9,6 +9,7 @@ import ResearchTab from '../components/detail/ResearchTab'
 import SelectionTab from '../components/detail/SelectionTab'
 import { useCompanies } from '../hooks/useCompanies'
 import { STATUS_LIST, type CompanyStatus } from '../types'
+import LoadingState from '../components/common/LoadingState'
 
 const TABS = [
   { key: 'basic', label: '基本情報' },
@@ -22,10 +23,14 @@ type TabKey = (typeof TABS)[number]['key']
 export default function CompanyDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { getCompany, updateCompany, removeCompany } = useCompanies()
+  const { getCompany, updateCompany, removeCompany, loading } = useCompanies()
   const [params, setParams] = useSearchParams()
 
   const company = id ? getCompany(id) : undefined
+
+  if (loading) {
+    return <LoadingState label="企業データを読み込み中…" />
+  }
 
   if (!company) {
     return (
