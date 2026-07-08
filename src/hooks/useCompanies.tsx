@@ -13,6 +13,7 @@ import { emptyResearch } from '../data/seed'
 import { useAuth } from './useAuth'
 import { db } from '../lib/firebase'
 import type { Company, NewCompanyInput } from '../types'
+import { changedTopLevelFields } from '../utils/diff'
 import { uid } from '../utils/id'
 
 interface CompaniesStore {
@@ -128,9 +129,17 @@ export function CompaniesProvider({ children }: { children: ReactNode }) {
     if (!current) return
     const next = updater(current)
     setCompanies((prev) => prev.map((c) => (c.id === id ? next : c)))
-    const { id: _drop, ...rest } = next
-    const sanitized = JSON.parse(JSON.stringify(rest))
-    updateDoc(doc(db, COLLECTION, id), sanitized).catch((err) => {
+    // 変更されたトップレベルフィールドだけを部分更新する。
+    // ドキュメント全体を上書きすると、他端末が同時に編集した
+    // 別フィールドの変更まで巻き戻してしまうため
+    // （JSON 化は undefined の除去を兼ねる。Firestore は undefined を保存できない）
+    const { id: _dropNext, ...nextRest } = next
+    const { id: _dropCurrent, ...currentRest } = current
+    const after = JSON.parse(JSON.stringify(nextRest)) as Record<string, unknown>
+    const before = JSON.parse(JSON.stringify(currentRest)) as Record<string, unknown>
+    const changed = changedTopLevelFields(before, after)
+    if (Object.keys(changed).length === 0) return
+    updateDoc(doc(db, COLLECTION, id), changed).catch((err) => {
       console.error('企業データの更新に失敗しました', err)
       alert('データの保存に失敗しました。通信環境をご確認の上、もう一度お試しください。')
     })
