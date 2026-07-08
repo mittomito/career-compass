@@ -69,31 +69,37 @@ export default function PasswordResetPage() {
             <p className="mb-8 text-center text-[13px] text-ink-faint">
               登録したメールアドレスを入力してください。パスワード再設定用のリンクをお送りします。
             </p>
-            <div className="mb-2">
-              <label htmlFor="email" className="field-label">
-                メールアドレス
-              </label>
-              <input
-                id="email"
-                type="email"
-                className="input"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && submit()}
-              />
-            </div>
-
-            {error && <p className="mb-3 text-xs font-semibold text-danger">{error}</p>}
-
-            <button
-              type="button"
-              className="btn-primary mt-3 w-full rounded-xl py-3 text-base disabled:opacity-60"
-              onClick={submit}
-              disabled={submitting}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                submit()
+              }}
             >
-              {submitting ? '送信中…' : '再設定メールを送信'}
-            </button>
+              <div className="mb-2">
+                <label htmlFor="email" className="field-label">
+                  メールアドレス
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  className="input"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+
+              {error && <p className="mb-3 text-xs font-semibold text-danger">{error}</p>}
+
+              <button
+                type="submit"
+                className="btn-primary mt-3 w-full rounded-xl py-3 text-base disabled:opacity-60"
+                disabled={submitting}
+              >
+                {submitting ? '送信中…' : '再設定メールを送信'}
+              </button>
+            </form>
 
             <p className="mt-5 text-center text-sm text-ink-sub">
               <Link to="/" className="font-bold text-brand hover:underline">

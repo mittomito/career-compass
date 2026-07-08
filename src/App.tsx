@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import RedirectIfAuthed from './components/common/RedirectIfAuthed'
 import RequireAuth from './components/common/RequireAuth'
 import AppLayout from './layouts/AppLayout'
 import CalendarPage from './pages/CalendarPage'
@@ -15,8 +16,22 @@ import AccountSettingsPage from './pages/AccountSettingsPage'
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<LoginPage />} />
-      <Route path="/register-account" element={<SignUpPage />} />
+      <Route
+        path="/"
+        element={
+          <RedirectIfAuthed>
+            <LoginPage />
+          </RedirectIfAuthed>
+        }
+      />
+      <Route
+        path="/register-account"
+        element={
+          <RedirectIfAuthed>
+            <SignUpPage />
+          </RedirectIfAuthed>
+        }
+      />
       <Route path="/reset-password" element={<PasswordResetPage />} />
       <Route path="/privacy" element={<PrivacyPolicyPage />} />
       <Route

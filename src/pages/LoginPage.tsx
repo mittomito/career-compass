@@ -62,49 +62,56 @@ export default function LoginPage() {
           選考の「今」と「次」がひと目でわかる就活管理アプリ
         </p>
 
-        <div className="mb-4">
-          <label htmlFor="email" className="field-label">
-            メールアドレス
-          </label>
-          <input
-            id="email"
-            type="email"
-            className="input"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-        <div className="mb-2">
-          <label htmlFor="password" className="field-label">
-            パスワード
-          </label>
-          <input
-            id="password"
-            type="password"
-            className="input"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && submit()}
-          />
-        </div>
-        <div className="mb-4 text-right">
-          <Link to="/reset-password" className="text-xs font-semibold text-brand hover:underline">
-            パスワードをお忘れの方
-          </Link>
-        </div>
-
-        {error && <p className="mb-3 text-xs font-semibold text-danger">{error}</p>}
-
-        <button
-          type="button"
-          className="btn-primary mt-3 w-full rounded-xl py-3 text-base disabled:opacity-60"
-          onClick={submit}
-          disabled={submitting}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            submit()
+          }}
         >
-          {submitting ? 'ログイン中…' : 'ログイン'}
-        </button>
+          <div className="mb-4">
+            <label htmlFor="email" className="field-label">
+              メールアドレス
+            </label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              className="input"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className="mb-2">
+            <label htmlFor="password" className="field-label">
+              パスワード
+            </label>
+            <input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              className="input"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <div className="mb-4 text-right">
+            <Link to="/reset-password" className="text-xs font-semibold text-brand hover:underline">
+              パスワードをお忘れの方
+            </Link>
+          </div>
+
+          {error && <p className="mb-3 text-xs font-semibold text-danger">{error}</p>}
+
+          <button
+            type="submit"
+            className="btn-primary mt-3 w-full rounded-xl py-3 text-base disabled:opacity-60"
+            disabled={submitting}
+          >
+            {submitting ? 'ログイン中…' : 'ログイン'}
+          </button>
+        </form>
 
         <p className="mt-5 text-center text-sm text-ink-sub">
           アカウントをお持ちでない方は{' '}
