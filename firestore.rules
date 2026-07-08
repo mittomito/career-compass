@@ -1,0 +1,31 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 企業データ：所有者本人（ownerId == 自分のuid）のみ読み書き可能
+    match /companies/{companyId} {
+      // 一覧取得・個別取得（アプリは where('ownerId','==',uid) のクエリで購読する）
+      allow read: if request.auth != null
+                  && resource.data.ownerId == request.auth.uid;
+
+      // 新規作成：自分を所有者として設定したドキュメントのみ作成できる
+      allow create: if request.auth != null
+                    && request.resource.data.ownerId == request.auth.uid;
+
+      // 更新：所有者本人のみ。ownerId の書き換え（所有権の移転）は禁止
+      allow update: if request.auth != null
+                    && resource.data.ownerId == request.auth.uid
+                    && request.resource.data.ownerId == resource.data.ownerId;
+
+      // 削除：所有者本人のみ（アカウント削除時の全件削除もこの条件で通る）
+      allow delete: if request.auth != null
+                    && resource.data.ownerId == request.auth.uid;
+    }
+
+    // 上記以外のコレクションはすべて拒否
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
