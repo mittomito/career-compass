@@ -13,6 +13,7 @@ import { emptyResearch } from '../data/seed'
 import { useAuth } from './useAuth'
 import { db } from '../lib/firebase'
 import type { Company, NewCompanyInput } from '../types'
+import { uid } from '../utils/id'
 
 interface CompaniesStore {
   companies: Company[]
@@ -96,7 +97,7 @@ export function CompaniesProvider({ children }: { children: ReactNode }) {
       input.type === 'インターン'
         ? ['応募', 'ES', '面接', '参加']
         : ['ES', 'Webテスト', '一次面接', '最終面接', '内定']
-    const flow = flowLabels.map((label) => ({ id: crypto.randomUUID(), label }))
+    const flow = flowLabels.map((label) => ({ id: uid(), label }))
     const base: Omit<Company, 'id'> = {
       name: input.name,
       industry: input.industry,
@@ -148,7 +149,8 @@ export function CompaniesProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({ companies, loading, getCompany, addCompany, updateCompany, removeCompany, removeAllCompanies }),
-    [companies, loading],
+    // addCompany が user を参照するため、user も依存に含める（欠けると stale closure になる）
+    [companies, loading, user],
   )
 
   return <CompaniesContext.Provider value={value}>{children}</CompaniesContext.Provider>
