@@ -97,8 +97,10 @@ export function CompaniesProvider({ children }: { children: ReactNode }) {
     const next = updater(current)
     setCompanies((prev) => prev.map((c) => (c.id === id ? next : c)))
     const { id: _drop, ...rest } = next
-    updateDoc(doc(db, COLLECTION, id), rest).catch((err) => {
+    const sanitized = JSON.parse(JSON.stringify(rest))
+    updateDoc(doc(db, COLLECTION, id), sanitized).catch((err) => {
       console.error('企業データの更新に失敗しました', err)
+      alert('データの保存に失敗しました。通信環境をご確認の上、もう一度お試しください。')
     })
   }
 
