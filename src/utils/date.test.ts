@@ -5,7 +5,6 @@ import {
   fmtMDT,
   fmtTime,
   isPastDay,
-  offsetIso,
   relLabel,
   sameDay,
   startOfToday,
@@ -28,14 +27,6 @@ afterEach(() => {
 describe('startOfToday', () => {
   it('今日の 00:00:00.000 を返す', () => {
     expect(startOfToday().getTime()).toBe(new Date(2026, 0, 15, 0, 0, 0, 0).getTime())
-  })
-})
-
-describe('offsetIso', () => {
-  it('今日基準で日数・時刻をオフセットした ISO 文字列を返す', () => {
-    expect(new Date(offsetIso(0, 14, 30)).getTime()).toBe(new Date(2026, 0, 15, 14, 30).getTime())
-    expect(new Date(offsetIso(3)).getTime()).toBe(new Date(2026, 0, 18, 0, 0).getTime())
-    expect(new Date(offsetIso(-1, 23, 59)).getTime()).toBe(new Date(2026, 0, 14, 23, 59).getTime())
   })
 })
 

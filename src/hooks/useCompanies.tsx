@@ -9,7 +9,7 @@ import {
   where,
 } from 'firebase/firestore'
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { emptyResearch } from '../data/seed'
+import { emptyResearch } from '../data/research'
 import { useAuth } from './useAuth'
 import { db } from '../lib/firebase'
 import type { Company, NewCompanyInput } from '../types'

@@ -6,13 +6,6 @@ export function startOfToday(): Date {
   return t
 }
 
-export function offsetIso(days: number, hours = 0, minutes = 0): string {
-  const d = startOfToday()
-  d.setDate(d.getDate() + days)
-  d.setHours(hours, minutes, 0, 0)
-  return d.toISOString()
-}
-
 export function fmtMD(iso: string): string {
   const x = new Date(iso)
   return `${x.getMonth() + 1}/${x.getDate()}(${DOW[x.getDay()]})`

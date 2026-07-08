@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { emptyResearch } from '../data/seed'
+import { emptyResearch } from '../data/research'
 import type { Company } from '../types'
 import { buildEvents, kindOf, nextDeadline, nextSchedule } from './events'
 

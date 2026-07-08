@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { emptyResearch } from '../data/seed'
+import { emptyResearch } from '../data/research'
 import type { Company } from '../types'
 import { buildInternshipBars } from './internships'
 
