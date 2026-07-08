@@ -1,6 +1,10 @@
 import {
   createUserWithEmailAndPassword,
+  deleteUser,
+  EmailAuthProvider,
   onAuthStateChanged,
+  reauthenticateWithCredential,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
   type User,
@@ -14,6 +18,8 @@ interface AuthStore {
   login: (email: string, password: string) => Promise<void>
   register: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
+  resetPassword: (email: string) => Promise<void>
+  deleteAccount: (password: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthStore | null>(null)
@@ -24,7 +30,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Firebase 側でログイン状態が変わるたび（初回読み込み・ログイン・ログアウト時）に発火する
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u)
       setLoading(false)
@@ -44,7 +49,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signOut(auth)
   }
 
-  const value = useMemo(() => ({ user, loading, login, register, logout }), [user, loading])
+  const resetPassword = async (email: string) => {
+    await sendPasswordResetEmail(auth, email)
+  }
+
+  const deleteAccount = async (password: string) => {
+    if (!auth.currentUser || !auth.currentUser.email) throw new Error('ログインしていません')
+    const credential = EmailAuthProvider.credential(auth.currentUser.email, password)
+    await reauthenticateWithCredential(auth.currentUser, credential)
+    await deleteUser(auth.currentUser)
+  }
+
+  const value = useMemo(
+    () => ({ user, loading, login, register, logout, resetPassword, deleteAccount }),
+    [user, loading],
+  )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

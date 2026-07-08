@@ -21,6 +21,7 @@ interface CompaniesStore {
   addCompany: (input: NewCompanyInput) => Promise<Company>
   updateCompany: (id: string, updater: (c: Company) => Company) => void
   removeCompany: (id: string) => void
+  removeAllCompanies: () => Promise<void>
 }
 
 const CompaniesContext = createContext<CompaniesStore | null>(null)
@@ -108,8 +109,12 @@ export function CompaniesProvider({ children }: { children: ReactNode }) {
     })
   }
 
+  const removeAllCompanies = async () => {
+    await Promise.all(companies.map((c) => deleteDoc(doc(db, COLLECTION, c.id))))
+  }
+
   const value = useMemo(
-    () => ({ companies, loading, getCompany, addCompany, updateCompany, removeCompany }),
+    () => ({ companies, loading, getCompany, addCompany, updateCompany, removeCompany, removeAllCompanies }),
     [companies, loading],
   )
 

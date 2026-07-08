@@ -6,14 +6,19 @@ import CompanyDetailPage from './pages/CompanyDetailPage'
 import HomePage from './pages/HomePage'
 import InternshipCalendarPage from './pages/InternshipCalendarPage'
 import LoginPage from './pages/LoginPage'
+import PasswordResetPage from './pages/PasswordResetPage'
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 import RegisterPage from './pages/RegisterPage'
 import SignUpPage from './pages/SignUpPage'
+import AccountSettingsPage from './pages/AccountSettingsPage'
 
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
       <Route path="/register-account" element={<SignUpPage />} />
+      <Route path="/reset-password" element={<PasswordResetPage />} />
+      <Route path="/privacy" element={<PrivacyPolicyPage />} />
       <Route
         element={
           <RequireAuth>
@@ -26,6 +31,7 @@ export default function App() {
         <Route path="/companies/:id" element={<CompanyDetailPage />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/internships" element={<InternshipCalendarPage />} />
+        <Route path="/account" element={<AccountSettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

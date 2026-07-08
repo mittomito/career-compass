@@ -1,4 +1,4 @@
-import { Briefcase, CalendarDays, House, LogOut, Plus } from 'lucide-react'
+import { Briefcase, CalendarDays, House, LogOut, Plus, Settings } from 'lucide-react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import BrandMark from '../components/common/BrandMark'
 import { useAuth } from '../hooks/useAuth'
@@ -46,6 +46,9 @@ export default function AppLayout() {
             <Link to="/companies/new" className="btn-primary">
               <Plus size={16} strokeWidth={2.6} />
               <span className="hidden sm:inline">企業を登録</span>
+            </Link>
+            <Link to="/account" className="icon-btn" title="アカウント設定" aria-label="アカウント設定">
+              <Settings size={16} strokeWidth={2.2} />
             </Link>
             <button
               type="button"

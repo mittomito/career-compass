@@ -89,6 +89,11 @@ export default function LoginPage() {
             onKeyDown={(e) => e.key === 'Enter' && submit()}
           />
         </div>
+        <div className="mb-4 text-right">
+          <Link to="/reset-password" className="text-xs font-semibold text-brand hover:underline">
+            パスワードをお忘れの方
+          </Link>
+        </div>
 
         {error && <p className="mb-3 text-xs font-semibold text-danger">{error}</p>}
 
@@ -105,6 +110,11 @@ export default function LoginPage() {
           アカウントをお持ちでない方は{' '}
           <Link to="/register-account" className="font-bold text-brand hover:underline">
             新規登録
+          </Link>
+        </p>
+        <p className="mt-3 text-center text-xs text-ink-faint">
+          <Link to="/privacy" className="hover:underline">
+            プライバシーポリシー
           </Link>
         </p>
       </div>

@@ -124,6 +124,13 @@ export default function SignUpPage() {
             ログイン
           </Link>
         </p>
+        <p className="mt-3 text-center text-xs text-ink-faint">
+          登録すると{' '}
+          <Link to="/privacy" className="font-semibold hover:underline">
+            プライバシーポリシー
+          </Link>
+          に同意したものとみなされます。
+        </p>
       </div>
     </div>
   )
