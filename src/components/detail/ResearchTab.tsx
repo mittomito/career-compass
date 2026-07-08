@@ -1,18 +1,49 @@
 import { ChevronDown, ExternalLink } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useCompanies } from '../../hooks/useCompanies'
-import { RESEARCH_CATEGORIES, type Company, type ResearchCategory, type ResearchEntry } from '../../types'
+import { RESEARCH_CATEGORIES, type Company, type ResearchCategory, type ResearchEntry, type ResearchNotes } from '../../types'
 import SectionCard from '../common/SectionCard'
 
 function hasContent(e: ResearchEntry): boolean {
   return Boolean(e.url || e.summary || e.memo)
 }
 
+/** 連続入力をまとめて保存するまでの待ち時間 */
+const SAVE_DEBOUNCE_MS = 500
+
 export default function ResearchTab({ company }: { company: Company }) {
   const { updateCompany } = useCompanies()
   const [openCats, setOpenCats] = useState<Set<ResearchCategory>>(
     () => new Set(RESEARCH_CATEGORIES.filter((cat) => hasContent(company.research[cat]))),
   )
+
+  // 入力はローカル draft に即時反映し、Firestore への保存はデバウンスでまとめる
+  // （従来は1キーストロークごとにドキュメント全体を書き込んでいた）
+  const [draft, setDraft] = useState<ResearchNotes>(company.research)
+  const draftRef = useRef(draft)
+  const dirtyRef = useRef(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // stale closure を避けるため、常に最新の updateCompany を参照する
+  const updateCompanyRef = useRef(updateCompany)
+  updateCompanyRef.current = updateCompany
+
+  const flush = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+    if (!dirtyRef.current) return
+    dirtyRef.current = false
+    updateCompanyRef.current(company.id, (c) => ({ ...c, research: draftRef.current }))
+  }
+  const flushRef = useRef(flush)
+  flushRef.current = flush
+
+  // タブ切替などでアンマウントされるとき、未保存の入力を確実に書き込む
+  useEffect(() => {
+    return () => flushRef.current()
+  }, [])
 
   const toggle = (cat: ResearchCategory) => {
     const next = new Set(openCats)
@@ -21,13 +52,16 @@ export default function ResearchTab({ company }: { company: Company }) {
     setOpenCats(next)
   }
 
-  const setEntry = (cat: ResearchCategory, patch: Partial<ResearchEntry>) =>
-    updateCompany(company.id, (c) => ({
-      ...c,
-      research: { ...c.research, [cat]: { ...c.research[cat], ...patch } },
-    }))
+  const setEntry = (cat: ResearchCategory, patch: Partial<ResearchEntry>) => {
+    const next = { ...draftRef.current, [cat]: { ...draftRef.current[cat], ...patch } }
+    draftRef.current = next
+    setDraft(next)
+    dirtyRef.current = true
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => flushRef.current(), SAVE_DEBOUNCE_MS)
+  }
 
-  const filledCount = RESEARCH_CATEGORIES.filter((cat) => hasContent(company.research[cat])).length
+  const filledCount = RESEARCH_CATEGORIES.filter((cat) => hasContent(draft[cat])).length
 
   return (
     <SectionCard title="企業研究ノート" count={filledCount}>
@@ -36,7 +70,7 @@ export default function ResearchTab({ company }: { company: Company }) {
       </p>
       <div className="flex flex-col gap-2.5">
         {RESEARCH_CATEGORIES.map((cat) => {
-          const entry = company.research[cat]
+          const entry = draft[cat]
           const open = openCats.has(cat)
           const filled = hasContent(entry)
           return (
