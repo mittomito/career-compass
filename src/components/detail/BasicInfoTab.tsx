@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { INDUSTRIES } from '../../data/constants'
 import { useCompanies } from '../../hooks/useCompanies'
 import type { Company, SelectionType } from '../../types'
+import { safeExternalHref } from '../../utils/url'
 import SectionCard from '../common/SectionCard'
 
 export default function BasicInfoTab({ company }: { company: Company }) {
@@ -35,6 +36,7 @@ export default function BasicInfoTab({ company }: { company: Company }) {
   }
 
   if (!editing) {
+    const mypageHref = safeExternalHref(company.mypageUrl)
     return (
       <SectionCard
         title="基本情報"
@@ -55,9 +57,9 @@ export default function BasicInfoTab({ company }: { company: Company }) {
           </dd>
           <dt className="pt-px text-[13px] font-bold text-ink-faint">マイページURL</dt>
           <dd>
-            {company.mypageUrl ? (
+            {mypageHref ? (
               <a
-                href={company.mypageUrl}
+                href={mypageHref}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-1 font-semibold text-brand hover:underline"
@@ -65,6 +67,8 @@ export default function BasicInfoTab({ company }: { company: Company }) {
                 {company.mypageUrl}
                 <ExternalLink size={13} />
               </a>
+            ) : company.mypageUrl ? (
+              <span className="break-all">{company.mypageUrl}</span>
             ) : (
               <span className="text-ink-faint">未登録</span>
             )}

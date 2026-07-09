@@ -2,6 +2,7 @@ import { ChevronDown, ExternalLink } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useCompanies } from '../../hooks/useCompanies'
 import { RESEARCH_CATEGORIES, type Company, type ResearchCategory, type ResearchEntry, type ResearchNotes } from '../../types'
+import { safeExternalHref } from '../../utils/url'
 import SectionCard from '../common/SectionCard'
 
 function hasContent(e: ResearchEntry): boolean {
@@ -73,6 +74,7 @@ export default function ResearchTab({ company }: { company: Company }) {
           const entry = draft[cat]
           const open = openCats.has(cat)
           const filled = hasContent(entry)
+          const entryHref = safeExternalHref(entry.url)
           return (
             <div key={cat} className="overflow-hidden rounded-xl border border-line bg-white">
               <button
@@ -97,9 +99,9 @@ export default function ResearchTab({ company }: { company: Company }) {
                   <div>
                     <label className="field-label flex items-center justify-between">
                       URL
-                      {entry.url && (
+                      {entryHref && (
                         <a
-                          href={entry.url}
+                          href={entryHref}
                           target="_blank"
                           rel="noreferrer"
                           className="inline-flex items-center gap-1 font-semibold text-brand hover:underline"

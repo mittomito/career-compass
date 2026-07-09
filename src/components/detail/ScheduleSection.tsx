@@ -6,6 +6,7 @@ import type { Company } from '../../types'
 import { fmtMDT, isPastDay, relLabel } from '../../utils/date'
 import { kindOf } from '../../utils/events'
 import { uid } from '../../utils/id'
+import { safeExternalHref } from '../../utils/url'
 import KindIcon from '../common/KindIcon'
 import SectionCard from '../common/SectionCard'
 
@@ -210,6 +211,7 @@ export default function ScheduleSection({ company }: { company: Company }) {
           ))}
           {schedules.map((s) => {
             const kind = kindOf(s.type)
+            const scheduleHref = s.url ? safeExternalHref(s.url) : undefined
             return (
               <div key={s.id} className="flex items-start gap-3.5 rounded-xl border border-line bg-white px-4 py-3">
                 <KindIcon kind={kind} />
@@ -235,9 +237,9 @@ export default function ScheduleSection({ company }: { company: Company }) {
                         {s.place}
                       </span>
                     )}
-                    {s.url && (
+                    {scheduleHref && (
                       <a
-                        href={s.url}
+                        href={scheduleHref}
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-1 font-semibold text-brand hover:underline"
