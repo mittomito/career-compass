@@ -12,19 +12,29 @@ export default function RegisterPage() {
   const [type, setType] = useState<SelectionType>('インターン')
   const [title, setTitle] = useState('')
   const [error, setError] = useState(false)
+  const [submitError, setSubmitError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   const submit = async () => {
+    if (submitting) return
     if (!name.trim()) {
       setError(true)
       return
     }
-    const company = await addCompany({
-      name: name.trim(),
-      industry,
-      type,
-      title: title.trim() || (type === 'インターン' ? 'インターンシップ' : '本選考'),
-    })
-    navigate(`/companies/${company.id}`)
+    setSubmitError('')
+    setSubmitting(true)
+    try {
+      const company = await addCompany({
+        name: name.trim(),
+        industry,
+        type,
+        title: title.trim() || (type === 'インターン' ? 'インターンシップ' : '本選考'),
+      })
+      navigate(`/companies/${company.id}`)
+    } catch {
+      setSubmitError('登録に失敗しました。通信環境をご確認の上、もう一度お試しください。')
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -93,12 +103,23 @@ export default function RegisterPage() {
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
+        {submitError && <p className="mb-3 text-xs font-semibold text-danger">{submitError}</p>}
         <div className="flex gap-2.5">
-          <button type="button" className="btn-ghost flex-1" onClick={() => navigate('/home')}>
+          <button
+            type="button"
+            className="btn-ghost flex-1"
+            onClick={() => navigate('/home')}
+            disabled={submitting}
+          >
             キャンセル
           </button>
-          <button type="button" className="btn-primary flex-1" onClick={submit}>
-            登録して詳細ページへ
+          <button
+            type="button"
+            className="btn-primary flex-1 disabled:opacity-60"
+            onClick={submit}
+            disabled={submitting}
+          >
+            {submitting ? '登録中…' : '登録して詳細ページへ'}
           </button>
         </div>
       </div>
