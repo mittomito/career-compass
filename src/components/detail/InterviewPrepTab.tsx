@@ -1,4 +1,5 @@
-import { CopyPlus } from 'lucide-react'
+import { ChevronRight, CopyPlus, MessagesSquare } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { useCompanies } from '../../hooks/useCompanies'
 import { useInterviewPrep } from '../../hooks/useInterviewPrep'
 import type { Company, PrepNode } from '../../types'
@@ -35,21 +36,32 @@ export default function InterviewPrepTab({ company }: { company: Company }) {
   }
 
   return (
-    <PrepTreeSection
-      nodes={company.prepNodes}
-      updateNodes={updateNodes}
-      extraAction={
-        <button
-          type="button"
-          className="btn-text disabled:pointer-events-none disabled:opacity-40"
-          onClick={copyTemplate}
-          disabled={templateLoading}
-        >
-          <CopyPlus size={14} strokeWidth={2.4} />
-          テンプレートをコピー
-        </button>
-      }
-      emptyText="質問はまだありません。「テンプレートをコピー」で共通の想定質問を取り込むか、「質問を追加」から作成できます。"
-    />
+    <>
+      {/* テンプレートはアカウント共通のノートなので、企業データには含めず参照導線だけ置く */}
+      <Link
+        to="/interview-prep"
+        className="mb-4 flex items-center gap-2 rounded-xl border border-dashed border-line-strong bg-brand-ghost px-4 py-2.5 text-sm font-semibold text-ink-sub transition hover:border-brand hover:text-brand"
+      >
+        <MessagesSquare size={15} className="shrink-0 text-brand" />
+        <span className="min-w-0 flex-1">共通の想定質問は「面接対策テンプレート」で編集できます</span>
+        <ChevronRight size={15} className="shrink-0" />
+      </Link>
+      <PrepTreeSection
+        nodes={company.prepNodes}
+        updateNodes={updateNodes}
+        extraAction={
+          <button
+            type="button"
+            className="btn-text disabled:pointer-events-none disabled:opacity-40"
+            onClick={copyTemplate}
+            disabled={templateLoading}
+          >
+            <CopyPlus size={14} strokeWidth={2.4} />
+            テンプレートをコピー
+          </button>
+        }
+        emptyText="質問はまだありません。「テンプレートをコピー」で共通の想定質問を取り込むか、「質問を追加」から作成できます。"
+      />
+    </>
   )
 }

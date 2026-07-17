@@ -1,6 +1,5 @@
-import { ChevronDown, ChevronRight, MessagesSquare, Plus, Trash2, X } from 'lucide-react'
+import { ChevronDown, Plus, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { useCompanies } from '../../hooks/useCompanies'
 import type { Company, InterviewQA } from '../../types'
 import { fmtMD } from '../../utils/date'
@@ -144,16 +143,6 @@ export default function InterviewTab({ company }: { company: Company }) {
         </button>
       }
     >
-      {/* テンプレートは企業データではなくアカウント共通のノートなので、参照導線だけ置く */}
-      <Link
-        to="/interview-prep"
-        className="mb-4 flex items-center gap-2 rounded-xl border border-dashed border-line-strong bg-brand-ghost px-4 py-2.5 text-sm font-semibold text-ink-sub transition hover:border-brand hover:text-brand"
-      >
-        <MessagesSquare size={15} className="shrink-0 text-brand" />
-        <span className="min-w-0 flex-1">想定質問と深掘りの準備は「面接対策テンプレート」へ</span>
-        <ChevronRight size={15} className="shrink-0" />
-      </Link>
-
       {adding && (
         <InterviewForm
           onSave={(draft) => {

@@ -1,6 +1,6 @@
 import { deleteDoc, doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore'
 import { useEffect, useRef, useState } from 'react'
-import { seedPrepNodes } from '../data/interviewPrep'
+import { pruneLegacySeeds, seedPrepNodes } from '../data/interviewPrep'
 import { db } from '../lib/firebase'
 import type { PrepNode } from '../types'
 import { useAuth } from './useAuth'
@@ -25,6 +25,8 @@ export function useInterviewPrep() {
   const [loading, setLoading] = useState(true)
   // 「未作成 → 雛形を保存」を購読中に何度も繰り返さないためのフラグ
   const seededRef = useRef(false)
+  // 旧雛形の掃除の書き戻しを 1 回に留めるフラグ（失敗しても表示上は除去済みになる）
+  const prunedRef = useRef(false)
 
   useEffect(() => {
     if (!user) {
@@ -49,8 +51,18 @@ export function useInterviewPrep() {
           }
           return
         }
-        setNodes((snap.data() as StoredPrep).nodes ?? [])
+        const stored = (snap.data() as StoredPrep).nodes ?? []
+        // 旧雛形（自己PRなど）が手つかずで残っていれば読み込み時に取り除き、
+        // 取り除けた場合は Firestore にも書き戻して次回以降の掃除を不要にする
+        const pruned = pruneLegacySeeds(stored)
+        setNodes(pruned)
         setLoading(false)
+        if (pruned.length !== stored.length && !prunedRef.current) {
+          prunedRef.current = true
+          updateDoc(ref, { nodes: pruned }).catch((err) => {
+            console.error('旧雛形の整理の保存に失敗しました', err)
+          })
+        }
       },
       (err) => {
         console.error('面接対策テンプレートの取得に失敗しました', err)
