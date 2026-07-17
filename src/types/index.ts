@@ -105,6 +105,19 @@ export interface CustomResearchCategory {
   memo: string
 }
 
+/**
+ * 面接対策テンプレートの質問ノード。
+ * 全ノードをフラットな配列で持ち、parentId で親子関係（深掘りツリー）を表現する。
+ * Firestore はネスト深度に上限があるため、配列のネストではなくこの形にしている。
+ */
+export interface PrepNode {
+  id: string
+  /** ルート質問（ガクチカ・志望動機など）は null。深掘り質問は親質問の id */
+  parentId: string | null
+  question: string
+  answer: string
+}
+
 export interface Company {
   id: string
   name: string
@@ -122,6 +135,11 @@ export interface Company {
   deadlines?: LegacyDeadline[]
   esEntries: EsEntry[]
   interviews: Interview[]
+  /**
+   * 企業ごとの面接対策（深掘り質問ツリー）。アカウント共通のテンプレート
+   * （interviewPreps コレクション）からコピーした後は、独立したデータとして扱う
+   */
+  prepNodes: PrepNode[]
   research: ResearchNotes
   customResearch: CustomResearchCategory[]
   internshipPeriods: InternshipPeriod[]

@@ -4,6 +4,7 @@ import EmptyState from '../components/common/EmptyState'
 import StatusBadge from '../components/common/StatusBadge'
 import BasicInfoTab from '../components/detail/BasicInfoTab'
 import EsTab from '../components/detail/EsTab'
+import InterviewPrepTab from '../components/detail/InterviewPrepTab'
 import InterviewTab from '../components/detail/InterviewTab'
 import ResearchTab from '../components/detail/ResearchTab'
 import SelectionTab from '../components/detail/SelectionTab'
@@ -15,7 +16,9 @@ const TABS = [
   { key: 'basic', label: '基本情報' },
   { key: 'selection', label: '選考' },
   { key: 'es', label: 'ES' },
-  { key: 'interview', label: '面接' },
+  { key: 'prep', label: '面接対策' },
+  // 旧「面接」タブ。既存リンク（?tab=interview）を壊さないよう key は変えない
+  { key: 'interview', label: '振り返り' },
   { key: 'research', label: '企業研究' },
 ] as const
 type TabKey = (typeof TABS)[number]['key']
@@ -143,6 +146,7 @@ export default function CompanyDetailPage() {
         {tab === 'basic' && <BasicInfoTab company={company} />}
         {tab === 'selection' && <SelectionTab company={company} />}
         {tab === 'es' && <EsTab company={company} />}
+        {tab === 'prep' && <InterviewPrepTab company={company} />}
         {tab === 'interview' && <InterviewTab company={company} />}
         {tab === 'research' && <ResearchTab company={company} />}
       </div>

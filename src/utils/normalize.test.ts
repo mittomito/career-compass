@@ -8,6 +8,7 @@ describe('normalizeCompany', () => {
     expect(c.id).toBe('id1')
     expect(c.schedules).toEqual([])
     expect(c.esEntries).toEqual([])
+    expect(c.prepNodes).toEqual([])
     expect(c.customResearch).toEqual([])
     expect(c.rejectionMemo).toBe('')
     expect(c.color).toBe('')

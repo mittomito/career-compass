@@ -6,6 +6,7 @@ import CalendarPage from './pages/CalendarPage'
 import CompanyDetailPage from './pages/CompanyDetailPage'
 import HomePage from './pages/HomePage'
 import InternshipCalendarPage from './pages/InternshipCalendarPage'
+import InterviewPrepPage from './pages/InterviewPrepPage'
 import LoginPage from './pages/LoginPage'
 import PasswordResetPage from './pages/PasswordResetPage'
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
@@ -46,6 +47,7 @@ export default function App() {
         <Route path="/companies/:id" element={<CompanyDetailPage />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/internships" element={<InternshipCalendarPage />} />
+        <Route path="/interview-prep" element={<InterviewPrepPage />} />
         <Route path="/account" element={<AccountSettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

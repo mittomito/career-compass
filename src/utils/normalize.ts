@@ -47,6 +47,7 @@ export function normalizeCompany(id: string, data: StoredCompany): Company {
     deadlines: data.deadlines,
     esEntries: data.esEntries ?? [],
     interviews: data.interviews ?? [],
+    prepNodes: data.prepNodes ?? [],
     // research はフィールド自体の欠損に加え、カテゴリ追加時の「一部キーだけ無い」状態も補完する
     research: { ...emptyResearch(), ...data.research },
     customResearch: data.customResearch ?? [],

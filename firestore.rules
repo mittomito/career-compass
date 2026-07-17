@@ -23,6 +23,22 @@ service cloud.firestore {
                     && resource.data.ownerId == request.auth.uid;
     }
 
+    // 面接対策テンプレート：アカウントに1つだけ持つドキュメント（ドキュメントID = 本人のuid）。
+    // 企業データと同じく所有者本人のみ読み書き可能
+    match /interviewPreps/{userId} {
+      allow read: if request.auth != null
+                  && request.auth.uid == userId;
+
+      // 作成・更新：ドキュメントIDが自分のuidで、ownerId にも自分を設定している場合のみ
+      allow create, update: if request.auth != null
+                            && request.auth.uid == userId
+                            && request.resource.data.ownerId == request.auth.uid;
+
+      // 削除：本人のみ（アカウント削除時のデータ掃除で使う）
+      allow delete: if request.auth != null
+                    && request.auth.uid == userId;
+    }
+
     // 上記以外のコレクションはすべて拒否
     match /{document=**} {
       allow read, write: if false;

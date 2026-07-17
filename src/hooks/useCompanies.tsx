@@ -83,6 +83,7 @@ export function CompaniesProvider({ children }: { children: ReactNode }) {
       schedules: [],
       esEntries: [],
       interviews: [],
+      prepNodes: [],
       research: emptyResearch(),
       customResearch: [],
       internshipPeriods: [],

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useCompanies } from '../hooks/useCompanies'
+import { deleteInterviewPrep } from '../hooks/useInterviewPrep'
 import { Link } from 'react-router-dom'
 
 function toJapaneseError(code: string): string {
@@ -42,6 +43,7 @@ export default function AccountSettingsPage() {
       // アカウントだけ残ってデータが消失するため、この順序を変えないこと
       await reauthenticate(password)
       await removeAllCompanies()
+      if (user) await deleteInterviewPrep(user.uid)
       await deleteAccount()
       navigate('/')
     } catch (err) {
@@ -73,7 +75,7 @@ export default function AccountSettingsPage() {
           <div>
             <h2 className="text-base font-extrabold text-ink">アカウントを削除する</h2>
             <p className="mt-1 text-sm text-ink-sub">
-              アカウントを削除すると、登録している全ての企業データ・ES・面接記録・企業研究メモが完全に削除されます。この操作は取り消せません。
+              アカウントを削除すると、登録している全ての企業データ・ES・面接記録・企業研究メモ・面接対策テンプレートが完全に削除されます。この操作は取り消せません。
             </p>
           </div>
         </div>

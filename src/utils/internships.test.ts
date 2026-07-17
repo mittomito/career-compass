@@ -19,6 +19,7 @@ function makeCompany(over: Partial<Company> = {}): Company {
     schedules: [],
     esEntries: [],
     interviews: [],
+    prepNodes: [],
     research: emptyResearch(),
     customResearch: [],
     internshipPeriods: [],

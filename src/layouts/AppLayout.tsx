@@ -1,4 +1,4 @@
-import { Briefcase, CalendarDays, House, LogOut, Plus, Settings } from 'lucide-react'
+import { Briefcase, CalendarDays, House, LogOut, MessagesSquare, Plus, Settings } from 'lucide-react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import BrandMark from '../components/common/BrandMark'
 import { useAuth } from '../hooks/useAuth'
@@ -43,6 +43,10 @@ export default function AppLayout() {
                 <span className="hidden sm:inline">インターン期間</span>
               </NavLink>
             )}
+            <NavLink to="/interview-prep" className={navClass}>
+              <MessagesSquare size={16} strokeWidth={2.2} />
+              <span className="hidden sm:inline">面接対策</span>
+            </NavLink>
             <Link to="/companies/new" className="btn-primary">
               <Plus size={16} strokeWidth={2.6} />
               <span className="hidden sm:inline">企業を登録</span>
