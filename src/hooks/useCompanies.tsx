@@ -14,6 +14,7 @@ import { useAuth } from './useAuth'
 import { db } from '../lib/firebase'
 import type { Company, NewCompanyInput } from '../types'
 import { changedTopLevelFields } from '../utils/diff'
+import { normalizeCompany, type StoredCompany } from '../utils/normalize'
 import { uid } from '../utils/id'
 
 interface CompaniesStore {
@@ -29,35 +30,6 @@ interface CompaniesStore {
 const CompaniesContext = createContext<CompaniesStore | null>(null)
 
 const COLLECTION = 'companies'
-
-/**
- * Firestore から取得したデータに既定値を補完して Company に整える。
- * 後からアプリに追加されたフィールド（internshipPeriods など）を持たない
- * 古いドキュメントを読んでもクラッシュしないようにするための防御層。
- */
-function normalizeCompany(id: string, data: Partial<Omit<Company, 'id'>>): Company {
-  return {
-    id,
-    name: data.name ?? '',
-    industry: data.industry ?? '',
-    type: data.type ?? '本選考',
-    title: data.title ?? '',
-    status: data.status ?? '応募予定',
-    memo: data.memo ?? '',
-    mypageUrl: data.mypageUrl ?? '',
-    loginId: data.loginId ?? '',
-    flow: data.flow ?? [],
-    currentStepId: data.currentStepId ?? null,
-    schedules: data.schedules ?? [],
-    deadlines: data.deadlines ?? [],
-    esEntries: data.esEntries ?? [],
-    interviews: data.interviews ?? [],
-    // research はフィールド自体の欠損に加え、カテゴリ追加時の「一部キーだけ無い」状態も補完する
-    research: { ...emptyResearch(), ...data.research },
-    internshipPeriods: data.internshipPeriods ?? [],
-    ownerId: data.ownerId,
-  }
-}
 
 export function CompaniesProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
@@ -76,9 +48,7 @@ export function CompaniesProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        const list = snapshot.docs.map((d) =>
-          normalizeCompany(d.id, d.data() as Partial<Omit<Company, 'id'>>),
-        )
+        const list = snapshot.docs.map((d) => normalizeCompany(d.id, d.data() as StoredCompany))
         setCompanies(list)
         setLoading(false)
       },
@@ -111,11 +81,13 @@ export function CompaniesProvider({ children }: { children: ReactNode }) {
       flow,
       currentStepId: flow[0]?.id ?? null,
       schedules: [],
-      deadlines: [],
       esEntries: [],
       interviews: [],
       research: emptyResearch(),
+      customResearch: [],
       internshipPeriods: [],
+      rejectionMemo: '',
+      color: '',
       // Firestore 側にのみ持たせる、データの持ち主を示すフィールド
       ownerId: user.uid,
     } as Omit<Company, 'id'> & { ownerId: string }

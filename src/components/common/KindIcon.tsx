@@ -1,9 +1,11 @@
-import { AlarmClock, Calendar, MonitorCheck, Users } from 'lucide-react'
+import { Calendar, FileText, MessagesSquare, MonitorCheck, Users, Video } from 'lucide-react'
 import { KIND_STYLES } from '../../data/constants'
 import type { EventKind } from '../../types'
 
 const ICONS: Record<EventKind, typeof Users> = {
-  締切: AlarmClock,
+  ES: FileText,
+  GD: MessagesSquare,
+  動画選考: Video,
   面接: Users,
   Webテスト: MonitorCheck,
   その他: Calendar,

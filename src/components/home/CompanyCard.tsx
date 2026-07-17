@@ -1,16 +1,16 @@
-import { AlarmClock, CalendarClock, StickyNote, TrendingUp } from 'lucide-react'
+import { CalendarClock, StickyNote, TrendingUp } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useCurrentStep } from '../../hooks/useCurrentStep'
 import type { Company } from '../../types'
 import { daysLeft, fmtMD, fmtMDT, relLabel } from '../../utils/date'
-import { nextDeadline, nextSchedule } from '../../utils/events'
+import { nextSchedule } from '../../utils/events'
 import StatusBadge from '../common/StatusBadge'
 
 export default function CompanyCard({ company }: { company: Company }) {
   const navigate = useNavigate()
   const ns = nextSchedule(company)
-  const nd = nextDeadline(company)
-  const deadlineNear = nd !== undefined && daysLeft(nd.date) <= 3
+  // 種類を問わず、3日以内に迫った予定は強調して緊急度を伝える
+  const near = ns !== undefined && daysLeft(ns.date) <= 3
   const { step, index, total } = useCurrentStep(company)
 
   const goDetail = () => navigate(`/companies/${company.id}`)
@@ -48,15 +48,9 @@ export default function CompanyCard({ company }: { company: Company }) {
 
           <div className="mt-1.5 flex flex-col gap-0.5 text-[10px] font-semibold text-ink-sub">
             {ns && (
-              <span className="flex items-center gap-1 truncate">
-                <CalendarClock size={11} className="shrink-0 text-brand" />
-                {fmtMD(ns.date)}（{relLabel(ns.date)}）
-              </span>
-            )}
-            {nd && (
-              <span className={`flex items-center gap-1 truncate ${deadlineNear ? 'font-bold text-danger' : ''}`}>
-                <AlarmClock size={11} className={`shrink-0 ${deadlineNear ? 'text-danger' : 'text-ink-faint'}`} />
-                {fmtMD(nd.date)}（{relLabel(nd.date)}）
+              <span className={`flex items-center gap-1 truncate ${near ? 'font-bold text-danger' : ''}`}>
+                <CalendarClock size={11} className={`shrink-0 ${near ? 'text-danger' : 'text-brand'}`} />
+                {fmtMD(ns.date)}（{relLabel(ns.date)}）{near && '⚠'}
               </span>
             )}
           </div>
@@ -64,7 +58,7 @@ export default function CompanyCard({ company }: { company: Company }) {
       </div>
 
       {/* デスクトップ：従来の横長レイアウト */}
-      <div className="hidden grid-cols-[minmax(200px,1.25fr)_minmax(120px,0.9fr)_minmax(135px,1fr)_minmax(125px,1fr)_minmax(130px,1fr)] items-center gap-x-4 gap-y-3 px-5 py-4 md:grid">
+      <div className="hidden grid-cols-[minmax(200px,1.25fr)_minmax(120px,0.9fr)_minmax(160px,1.15fr)_minmax(130px,1fr)] items-center gap-x-4 gap-y-3 px-5 py-4 md:grid">
         <div>
           <p className="text-[17px] font-extrabold leading-snug">{company.name}</p>
           <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-ink-sub">
@@ -93,28 +87,11 @@ export default function CompanyCard({ company }: { company: Company }) {
           </p>
           {ns ? (
             <>
-              <p className="text-sm font-semibold">{fmtMDT(ns.date)}</p>
-              <p className="text-xs text-ink-sub">
+              <p className={`text-sm font-semibold ${near ? 'text-danger' : ''}`}>
+                {fmtMDT(ns.date)} {near && '⚠'}
+              </p>
+              <p className={`text-xs ${near ? 'text-danger' : 'text-ink-sub'}`}>
                 {ns.type}（{relLabel(ns.date)}）
-              </p>
-            </>
-          ) : (
-            <p className="text-sm text-ink-faint">—</p>
-          )}
-        </div>
-
-        <div>
-          <p className="cell-label mb-1">
-            <AlarmClock size={11} />
-            締切
-          </p>
-          {nd ? (
-            <>
-              <p className={`text-sm font-semibold ${deadlineNear ? 'text-danger' : ''}`}>
-                {fmtMD(nd.date)} {deadlineNear && '⚠'}
-              </p>
-              <p className={`text-xs ${deadlineNear ? 'text-danger' : 'text-ink-sub'}`}>
-                {nd.label}（{relLabel(nd.date)}）
               </p>
             </>
           ) : (

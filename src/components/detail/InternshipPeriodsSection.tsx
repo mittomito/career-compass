@@ -1,5 +1,6 @@
-import { Plus, Trash2 } from 'lucide-react'
+import { Check, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { COMPANY_COLOR_PALETTE } from '../../data/constants'
 import { useCompanies } from '../../hooks/useCompanies'
 import type { Company } from '../../types'
 import { fmtMD } from '../../utils/date'
@@ -38,6 +39,9 @@ export default function InternshipPeriodsSection({ company }: { company: Company
       internshipPeriods: c.internshipPeriods.filter((p) => p.id !== id),
     }))
 
+  // 色は企業単位で1つ。この企業のすべてのインターン期間に同じ色が使われる
+  const setColor = (color: string) => updateCompany(company.id, (c) => ({ ...c, color }))
+
   const periods = [...company.internshipPeriods].sort(
     (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
   )
@@ -56,6 +60,41 @@ export default function InternshipPeriodsSection({ company }: { company: Company
       <p className="mb-3 text-xs text-ink-faint">
         登録した期間は「インターン期間カレンダー」で他社の日程と重なっていないか確認できます。
       </p>
+
+      <div className="mb-4">
+        <p className="field-label">カレンダーでの表示色</p>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <button
+            type="button"
+            className={`rounded-full border px-3 py-1 text-xs font-bold transition ${
+              company.color === ''
+                ? 'border-brand bg-brand-soft text-brand'
+                : 'border-line-strong bg-white text-ink-sub'
+            }`}
+            onClick={() => setColor('')}
+          >
+            自動
+          </button>
+          {COMPANY_COLOR_PALETTE.map((color) => {
+            const selected = company.color === color
+            return (
+              <button
+                key={color}
+                type="button"
+                className={`inline-flex h-7 w-7 items-center justify-center rounded-full transition ${
+                  selected ? 'ring-2 ring-ink ring-offset-2' : 'hover:scale-110'
+                }`}
+                style={{ background: color }}
+                onClick={() => setColor(color)}
+                aria-label={`表示色 ${color} を選択`}
+                aria-pressed={selected}
+              >
+                {selected && <Check size={14} strokeWidth={3} className="text-white" />}
+              </button>
+            )
+          })}
+        </div>
+      </div>
 
       {adding && (
         <div className="mb-4 grid grid-cols-1 gap-3 rounded-xl border border-line bg-brand-ghost p-4 md:grid-cols-3">

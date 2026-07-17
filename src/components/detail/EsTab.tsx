@@ -2,7 +2,6 @@ import { ChevronDown, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useCompanies } from '../../hooks/useCompanies'
 import type { Company, EsEntry } from '../../types'
-import { fmtMD, toInputDate } from '../../utils/date'
 import { uid } from '../../utils/id'
 import SectionCard from '../common/SectionCard'
 
@@ -10,10 +9,9 @@ interface EsDraft {
   question: string
   answer: string
   limit: number
-  submittedAt: string
 }
 
-const EMPTY_DRAFT: EsDraft = { question: '', answer: '', limit: 400, submittedAt: '' }
+const EMPTY_DRAFT: EsDraft = { question: '', answer: '', limit: 400 }
 
 function EsForm({
   initial,
@@ -54,21 +52,14 @@ function EsForm({
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="field-label">文字数制限</label>
+          {/* 矢印クリックは50刻み。手入力なら任意の数値も設定できる */}
           <input
             type="number"
-            min={1}
+            min={0}
+            step={50}
             className="input"
             value={draft.limit}
             onChange={(e) => setDraft({ ...draft, limit: Math.max(1, Number(e.target.value) || 1) })}
-          />
-        </div>
-        <div>
-          <label className="field-label">提出日（未提出なら空欄）</label>
-          <input
-            type="date"
-            className="input"
-            value={draft.submittedAt}
-            onChange={(e) => setDraft({ ...draft, submittedAt: e.target.value })}
           />
         </div>
       </div>
@@ -105,7 +96,6 @@ export default function EsTab({ company }: { company: Company }) {
     question: draft.question.trim(),
     answer: draft.answer,
     limit: draft.limit,
-    submittedAt: draft.submittedAt ? new Date(`${draft.submittedAt}T00:00`).toISOString() : null,
   })
 
   const save = (draft: EsDraft) => {
@@ -159,12 +149,7 @@ export default function EsTab({ company }: { company: Company }) {
               return (
                 <EsForm
                   key={e.id}
-                  initial={{
-                    question: e.question,
-                    answer: e.answer,
-                    limit: e.limit,
-                    submittedAt: e.submittedAt ? toInputDate(e.submittedAt) : '',
-                  }}
+                  initial={{ question: e.question, answer: e.answer, limit: e.limit }}
                   onSave={save}
                   onCancel={() => setEditingId(null)}
                 />
@@ -187,11 +172,6 @@ export default function EsTab({ company }: { company: Company }) {
                     <span className={over ? 'font-bold text-danger' : ''}>
                       {e.answer.length} / {e.limit}字
                     </span>
-                    {e.submittedAt ? (
-                      <span>提出 {fmtMD(e.submittedAt)}</span>
-                    ) : (
-                      <span className="font-bold text-warn">下書き</span>
-                    )}
                     <ChevronDown
                       size={15}
                       className={`shrink-0 transition ${open ? 'rotate-180' : ''}`}

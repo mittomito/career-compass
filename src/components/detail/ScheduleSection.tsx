@@ -1,86 +1,90 @@
-import { ExternalLink, MapPin, Plus, Trash2 } from 'lucide-react'
+import { AlertTriangle, ExternalLink, MapPin, Plus, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 import { KIND_STYLES, SCHEDULE_TYPE_PRESETS } from '../../data/constants'
 import { useCompanies } from '../../hooks/useCompanies'
-import type { Company } from '../../types'
-import { fmtMDT, isPastDay, relLabel } from '../../utils/date'
-import { kindOf } from '../../utils/events'
+import type { Company, Schedule } from '../../types'
+import { daysLeft, fmtMDT, relLabel } from '../../utils/date'
+import { kindOf, scheduleDates } from '../../utils/events'
 import { uid } from '../../utils/id'
 import { safeExternalHref } from '../../utils/url'
 import KindIcon from '../common/KindIcon'
 import SectionCard from '../common/SectionCard'
 
-type FormMode = 'none' | 'schedule' | 'deadline'
+/** 予定の「効きの日付」：今日以降で最も近い候補日。すべて過ぎていれば最後の候補日 */
+function effectiveDate(s: Schedule): { date: string; past: boolean } {
+  const t = new Date().setHours(0, 0, 0, 0)
+  const dates = [...scheduleDates(s)].sort(
+    (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+  )
+  const upcoming = dates.find((d) => new Date(d).getTime() >= t)
+  return upcoming ? { date: upcoming, past: false } : { date: dates[dates.length - 1], past: true }
+}
 
 export default function ScheduleSection({ company }: { company: Company }) {
   const { updateCompany } = useCompanies()
-  const [mode, setMode] = useState<FormMode>('none')
-  const [sForm, setSForm] = useState({ type: '', date: '', place: '', url: '', memo: '' })
-  const [dForm, setDForm] = useState({ label: '', date: '' })
+  const [adding, setAdding] = useState(false)
+  const [form, setForm] = useState({ type: '', dates: [''], place: '', url: '', memo: '' })
+
+  const setDate = (i: number, value: string) =>
+    setForm({ ...form, dates: form.dates.map((d, j) => (j === i ? value : d)) })
+  const addDateField = () => setForm({ ...form, dates: [...form.dates, ''] })
+  const removeDateField = (i: number) =>
+    setForm({ ...form, dates: form.dates.filter((_, j) => j !== i) })
 
   const addSchedule = () => {
-    if (!sForm.type.trim() || !sForm.date) return
+    const dates = form.dates
+      .filter(Boolean)
+      .map((d) => new Date(d).toISOString())
+      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+    if (!form.type.trim() || dates.length === 0) return
     updateCompany(company.id, (c) => ({
       ...c,
       schedules: [
         ...c.schedules,
         {
           id: uid(),
-          type: sForm.type.trim(),
-          date: new Date(sForm.date).toISOString(),
-          place: sForm.place.trim() || undefined,
-          url: sForm.url.trim() || undefined,
-          memo: sForm.memo.trim() || undefined,
+          type: form.type.trim(),
+          date: dates[0],
+          // 候補日が1つだけなら従来どおりの単一日付として保存する
+          candidateDates: dates.length > 1 ? dates : undefined,
+          place: form.place.trim() || undefined,
+          url: form.url.trim() || undefined,
+          memo: form.memo.trim() || undefined,
         },
       ],
     }))
-    setSForm({ type: '', date: '', place: '', url: '', memo: '' })
-    setMode('none')
+    setForm({ type: '', dates: [''], place: '', url: '', memo: '' })
+    setAdding(false)
   }
 
-  const addDeadline = () => {
-    if (!dForm.label.trim() || !dForm.date) return
+  // 旧「締切」から移行された予定（id が dl- で始まる）を削除するときは、
+  // 変換元の deadlines も一緒に取り除き、次回読み込みで復活しないようにする
+  const removeSchedule = (id: string) =>
     updateCompany(company.id, (c) => ({
       ...c,
-      deadlines: [
-        ...c.deadlines,
-        { id: uid(), label: dForm.label.trim(), date: new Date(dForm.date).toISOString() },
-      ],
+      schedules: c.schedules.filter((s) => s.id !== id),
+      deadlines: id.startsWith('dl-')
+        ? c.deadlines?.filter((d) => `dl-${d.id}` !== id)
+        : c.deadlines,
     }))
-    setDForm({ label: '', date: '' })
-    setMode('none')
-  }
 
-  const removeSchedule = (id: string) =>
-    updateCompany(company.id, (c) => ({ ...c, schedules: c.schedules.filter((s) => s.id !== id) }))
-  const removeDeadline = (id: string) =>
-    updateCompany(company.id, (c) => ({ ...c, deadlines: c.deadlines.filter((s) => s.id !== id) }))
-
-  const deadlines = [...company.deadlines].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-  )
   const schedules = [...company.schedules].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    (a, b) =>
+      new Date(effectiveDate(a).date).getTime() - new Date(effectiveDate(b).date).getTime(),
   )
 
   return (
     <SectionCard
-      title="予定・締切"
-      count={deadlines.length + schedules.length}
+      title="予定"
+      count={schedules.length}
       action={
-        <div className="flex gap-1.5">
-          <button type="button" className="btn-text" onClick={() => setMode(mode === 'deadline' ? 'none' : 'deadline')}>
-            <Plus size={14} strokeWidth={2.6} />
-            締切を追加
-          </button>
-          <button type="button" className="btn-text" onClick={() => setMode(mode === 'schedule' ? 'none' : 'schedule')}>
-            <Plus size={14} strokeWidth={2.6} />
-            予定を追加
-          </button>
-        </div>
+        <button type="button" className="btn-text" onClick={() => setAdding((v) => !v)}>
+          <Plus size={14} strokeWidth={2.6} />
+          予定を追加
+        </button>
       }
     >
-      {mode === 'schedule' && (
+      {adding && (
         <div className="mb-4 grid grid-cols-1 gap-3 rounded-xl border border-line bg-brand-ghost p-4 md:grid-cols-2">
           <div>
             <label className="field-label">種類 *</label>
@@ -89,8 +93,8 @@ export default function ScheduleSection({ company }: { company: Company }) {
               className="input"
               list="schedule-presets"
               placeholder="例：一次面接"
-              value={sForm.type}
-              onChange={(e) => setSForm({ ...sForm, type: e.target.value })}
+              value={form.type}
+              onChange={(e) => setForm({ ...form, type: e.target.value })}
             />
             <datalist id="schedule-presets">
               {SCHEDULE_TYPE_PRESETS.map((p) => (
@@ -100,12 +104,35 @@ export default function ScheduleSection({ company }: { company: Company }) {
           </div>
           <div>
             <label className="field-label">日時 *</label>
-            <input
-              type="datetime-local"
-              className="input"
-              value={sForm.date}
-              onChange={(e) => setSForm({ ...sForm, date: e.target.value })}
-            />
+            <div className="flex flex-col gap-2">
+              {form.dates.map((d, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <input
+                    type="datetime-local"
+                    className="input"
+                    value={d}
+                    onChange={(e) => setDate(i, e.target.value)}
+                  />
+                  {form.dates.length > 1 && (
+                    <button
+                      type="button"
+                      className="icon-btn shrink-0"
+                      onClick={() => removeDateField(i)}
+                      aria-label="この候補日を削除"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <button type="button" className="btn-text mt-1.5" onClick={addDateField}>
+              <Plus size={13} strokeWidth={2.6} />
+              候補日を追加
+            </button>
+            <p className="mt-0.5 text-xs text-ink-faint">
+              企業から複数の候補日を提示されている場合は、すべて登録できます。
+            </p>
           </div>
           <div>
             <label className="field-label">場所</label>
@@ -113,8 +140,8 @@ export default function ScheduleSection({ company }: { company: Company }) {
               type="text"
               className="input"
               placeholder="例：本社 / オンライン"
-              value={sForm.place}
-              onChange={(e) => setSForm({ ...sForm, place: e.target.value })}
+              value={form.place}
+              onChange={(e) => setForm({ ...form, place: e.target.value })}
             />
           </div>
           <div>
@@ -123,8 +150,8 @@ export default function ScheduleSection({ company }: { company: Company }) {
               type="url"
               className="input"
               placeholder="https://"
-              value={sForm.url}
-              onChange={(e) => setSForm({ ...sForm, url: e.target.value })}
+              value={form.url}
+              onChange={(e) => setForm({ ...form, url: e.target.value })}
             />
           </div>
           <div className="md:col-span-2">
@@ -133,12 +160,12 @@ export default function ScheduleSection({ company }: { company: Company }) {
               type="text"
               className="input"
               placeholder="持ち物、注意点など"
-              value={sForm.memo}
-              onChange={(e) => setSForm({ ...sForm, memo: e.target.value })}
+              value={form.memo}
+              onChange={(e) => setForm({ ...form, memo: e.target.value })}
             />
           </div>
           <div className="flex justify-end gap-2 md:col-span-2">
-            <button type="button" className="btn-ghost" onClick={() => setMode('none')}>
+            <button type="button" className="btn-ghost" onClick={() => setAdding(false)}>
               キャンセル
             </button>
             <button type="button" className="btn-primary" onClick={addSchedule}>
@@ -148,89 +175,50 @@ export default function ScheduleSection({ company }: { company: Company }) {
         </div>
       )}
 
-      {mode === 'deadline' && (
-        <div className="mb-4 grid grid-cols-1 gap-3 rounded-xl border border-line bg-danger-soft p-4 md:grid-cols-2">
-          <div>
-            <label className="field-label">締切の内容 *</label>
-            <input
-              type="text"
-              className="input"
-              placeholder="例：ES提出締切"
-              value={dForm.label}
-              onChange={(e) => setDForm({ ...dForm, label: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className="field-label">日時 *</label>
-            <input
-              type="datetime-local"
-              className="input"
-              value={dForm.date}
-              onChange={(e) => setDForm({ ...dForm, date: e.target.value })}
-            />
-          </div>
-          <div className="flex justify-end gap-2 md:col-span-2">
-            <button type="button" className="btn-ghost" onClick={() => setMode('none')}>
-              キャンセル
-            </button>
-            <button type="button" className="btn-primary" onClick={addDeadline}>
-              締切を追加
-            </button>
-          </div>
-        </div>
-      )}
-
-      {deadlines.length + schedules.length === 0 ? (
+      {schedules.length === 0 ? (
         <p className="py-2 text-sm text-ink-faint">予定はまだ登録されていません。</p>
       ) : (
         <div className="flex flex-col gap-2.5">
-          {deadlines.map((d) => (
-            <div key={d.id} className="flex items-start gap-3.5 rounded-xl border border-line bg-white px-4 py-3">
-              <KindIcon kind="締切" />
-              <div className="min-w-0 flex-1">
-                <p className="flex flex-wrap items-center gap-2 text-sm font-bold">
-                  {d.label}
-                  <span
-                    className="rounded-full px-2 py-px text-xs font-bold"
-                    style={{ color: KIND_STYLES['締切'].fg, background: KIND_STYLES['締切'].bg }}
-                  >
-                    {relLabel(d.date)}
-                  </span>
-                </p>
-                <p className="mt-0.5 text-xs text-ink-sub">📅 {fmtMDT(d.date)}</p>
-              </div>
-              <button
-                type="button"
-                className="icon-btn hover:border-danger hover:bg-danger-soft hover:text-danger"
-                onClick={() => removeDeadline(d.id)}
-                aria-label="この締切を削除"
-              >
-                <Trash2 size={14} />
-              </button>
-            </div>
-          ))}
           {schedules.map((s) => {
             const kind = kindOf(s.type)
             const scheduleHref = s.url ? safeExternalHref(s.url) : undefined
+            const dates = scheduleDates(s)
+            const { date: primary, past } = effectiveDate(s)
+            // 種類を問わず、3日以内に迫った予定は強調して緊急度を伝える
+            const urgent = !past && daysLeft(primary) <= 3
             return (
-              <div key={s.id} className="flex items-start gap-3.5 rounded-xl border border-line bg-white px-4 py-3">
+              <div
+                key={s.id}
+                className={`flex items-start gap-3.5 rounded-xl border bg-white px-4 py-3 ${
+                  urgent ? 'border-danger bg-danger-soft/40' : 'border-line'
+                }`}
+              >
                 <KindIcon kind={kind} />
                 <div className="min-w-0 flex-1">
                   <p className="flex flex-wrap items-center gap-2 text-sm font-bold">
                     {s.type}
-                    {isPastDay(s.date) ? (
+                    {past ? (
                       <span className="tag">終了</span>
+                    ) : urgent ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-danger-soft px-2 py-px text-xs font-bold text-danger">
+                        <AlertTriangle size={11} strokeWidth={2.6} />
+                        {relLabel(primary)}
+                      </span>
                     ) : (
                       <span
                         className="rounded-full px-2 py-px text-xs font-bold"
                         style={{ color: KIND_STYLES[kind].fg, background: KIND_STYLES[kind].bg }}
                       >
-                        {relLabel(s.date)}
+                        {relLabel(primary)}
                       </span>
                     )}
                   </p>
                   <p className="mt-0.5 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-ink-sub">
-                    <span>📅 {fmtMDT(s.date)}</span>
+                    {dates.length > 1 ? (
+                      <span>📅 候補日: {dates.map((d) => fmtMDT(d)).join(' / ')}</span>
+                    ) : (
+                      <span>📅 {fmtMDT(primary)}</span>
+                    )}
                     {s.place && (
                       <span className="inline-flex items-center gap-1">
                         <MapPin size={12} />

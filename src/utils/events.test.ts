@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { emptyResearch } from '../data/research'
 import type { Company } from '../types'
-import { buildEvents, kindOf, nextDeadline, nextSchedule } from './events'
+import { buildEvents, kindOf, nextSchedule, scheduleDates } from './events'
 
 // 「今日」をローカルタイムの 2026-01-15 12:30 に固定
 const NOW = new Date(2026, 0, 15, 12, 30, 0)
@@ -28,11 +28,13 @@ function makeCompany(over: Partial<Company> = {}): Company {
     flow: [],
     currentStepId: null,
     schedules: [],
-    deadlines: [],
     esEntries: [],
     interviews: [],
     research: emptyResearch(),
+    customResearch: [],
     internshipPeriods: [],
+    rejectionMemo: '',
+    color: '',
     ...over,
   }
 }
@@ -45,9 +47,30 @@ describe('kindOf', () => {
     expect(kindOf('玉手箱')).toBe('Webテスト')
     expect(kindOf('説明会')).toBe('その他')
   })
-  it('「締切」を含む場合は他の語より優先する', () => {
-    expect(kindOf('ES提出締切')).toBe('締切')
-    expect(kindOf('Webテスト受検締切')).toBe('締切')
+  it('ES・GD・動画選考を判定できる', () => {
+    expect(kindOf('ES')).toBe('ES')
+    expect(kindOf('ES提出締切')).toBe('ES')
+    expect(kindOf('エントリーシート')).toBe('ES')
+    expect(kindOf('GD')).toBe('GD')
+    expect(kindOf('グループディスカッション')).toBe('GD')
+    expect(kindOf('動画選考')).toBe('動画選考')
+    expect(kindOf('動画提出')).toBe('動画選考')
+  })
+})
+
+describe('scheduleDates', () => {
+  it('候補日がなければ単一日付を返す', () => {
+    const s = { id: 's1', type: '面接', date: '2026-01-20T00:00:00.000Z' }
+    expect(scheduleDates(s)).toEqual(['2026-01-20T00:00:00.000Z'])
+  })
+  it('候補日があればすべて返す', () => {
+    const s = {
+      id: 's1',
+      type: '面接',
+      date: '2026-01-20T00:00:00.000Z',
+      candidateDates: ['2026-01-20T00:00:00.000Z', '2026-01-22T00:00:00.000Z'],
+    }
+    expect(scheduleDates(s)).toHaveLength(2)
   })
 })
 
@@ -68,36 +91,36 @@ describe('nextSchedule', () => {
     })
     expect(nextSchedule(c)).toBeUndefined()
   })
-})
-
-describe('nextDeadline', () => {
-  it('今日以降で最も近い締切を返す', () => {
+  it('複数候補日の予定は、未来で最も近い候補日を date に入れて返す', () => {
+    const near = new Date(2026, 0, 18).toISOString()
     const c = makeCompany({
-      deadlines: [
-        { id: 'd-far', label: '内定承諾締切', date: new Date(2026, 0, 30).toISOString() },
-        { id: 'd-near', label: 'ES提出締切', date: new Date(2026, 0, 18).toISOString() },
-        { id: 'd-past', label: '応募締切', date: new Date(2026, 0, 5).toISOString() },
+      schedules: [
+        {
+          id: 's1',
+          type: '面接',
+          date: new Date(2026, 0, 10).toISOString(),
+          candidateDates: [new Date(2026, 0, 10).toISOString(), near, new Date(2026, 0, 25).toISOString()],
+        },
       ],
     })
-    expect(nextDeadline(c)?.id).toBe('d-near')
-  })
-  it('締切がなければ undefined', () => {
-    expect(nextDeadline(makeCompany())).toBeUndefined()
+    const ns = nextSchedule(c)
+    expect(ns?.id).toBe('s1')
+    expect(ns?.date).toBe(near)
   })
 })
 
 describe('buildEvents', () => {
-  it('予定と締切をイベントに変換し、日付昇順に並べる', () => {
+  it('予定をイベントに変換し、日付昇順に並べる', () => {
     const c = makeCompany({
       schedules: [
         { id: 's1', type: '一次面接', date: new Date(2026, 0, 20, 14, 0).toISOString(), place: '本社' },
+        { id: 's2', type: 'ES提出締切', date: new Date(2026, 0, 18).toISOString() },
       ],
-      deadlines: [{ id: 'd1', label: 'ES提出締切', date: new Date(2026, 0, 18).toISOString() }],
     })
     const events = buildEvents([c])
     expect(events).toHaveLength(2)
-    // 日付昇順：締切(1/18) → 面接(1/20)
-    expect(events[0]).toMatchObject({ id: 'd-d1', kind: '締切', label: 'ES提出締切', companyId: 'c1' })
+    // 日付昇順：ES提出締切(1/18) → 面接(1/20)
+    expect(events[0]).toMatchObject({ id: 's-s2', kind: 'ES', label: 'ES提出締切', companyId: 'c1' })
     expect(events[1]).toMatchObject({
       id: 's-s1',
       kind: '面接',
@@ -105,6 +128,22 @@ describe('buildEvents', () => {
       companyName: 'テスト企業',
       place: '本社',
     })
+  })
+  it('複数候補日の予定は候補日ごとにイベントを作る', () => {
+    const c = makeCompany({
+      schedules: [
+        {
+          id: 's1',
+          type: '面接',
+          date: new Date(2026, 0, 20).toISOString(),
+          candidateDates: [new Date(2026, 0, 20).toISOString(), new Date(2026, 0, 22).toISOString()],
+        },
+      ],
+    })
+    const events = buildEvents([c])
+    expect(events).toHaveLength(2)
+    expect(events[0]).toMatchObject({ id: 's-s1-0', label: '面接（候補1/2）' })
+    expect(events[1]).toMatchObject({ id: 's-s1-1', label: '面接（候補2/2）' })
   })
   it('企業がなければ空配列', () => {
     expect(buildEvents([])).toEqual([])

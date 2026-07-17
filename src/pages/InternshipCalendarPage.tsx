@@ -2,7 +2,7 @@ import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import InternshipDayPanel from '../components/internship/InternshipDayPanel'
 import InternshipMonthGrid from '../components/internship/InternshipMonthGrid'
-import { INTERNSHIP_PALETTE } from '../data/constants'
+import { COMPANY_COLOR_PALETTE } from '../data/constants'
 import { useCompanies } from '../hooks/useCompanies'
 import { startOfToday } from '../utils/date'
 import { buildInternshipBars } from '../utils/internships'
@@ -19,9 +19,13 @@ export default function InternshipCalendarPage() {
 
   const internCompanies = useMemo(() => companies.filter((c) => c.type === 'インターン'), [companies])
 
+  // 企業が表示色を設定していればそれを使い、未設定の企業だけ従来どおり自動で割り当てる
   const colorMap = useMemo(() => {
     const map = new Map<string, string>()
-    internCompanies.forEach((c, i) => map.set(c.id, INTERNSHIP_PALETTE[i % INTERNSHIP_PALETTE.length]))
+    let autoIndex = 0
+    internCompanies.forEach((c) => {
+      map.set(c.id, c.color || COMPANY_COLOR_PALETTE[autoIndex++ % COMPANY_COLOR_PALETTE.length])
+    })
     return map
   }, [internCompanies])
 

@@ -12,7 +12,7 @@ function startOfMonth(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), 1)
 }
 
-const LEGEND: EventKind[] = ['締切', '面接', 'Webテスト', 'その他']
+const LEGEND: EventKind[] = ['ES', 'GD', '動画選考', '面接', 'Webテスト', 'その他']
 
 export default function CalendarPage() {
   const { companies } = useCompanies()

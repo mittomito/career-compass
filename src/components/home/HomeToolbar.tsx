@@ -5,7 +5,7 @@ import MultiSelectDropdown from '../common/MultiSelectDropdown'
 
 export type TypeFilter = 'all' | SelectionType
 export type StatusFilter = CompanyStatus[]
-export type SortKey = 'next' | 'deadline' | 'name'
+export type SortKey = 'next' | 'name'
 
 interface Props {
   query: string
@@ -28,7 +28,6 @@ const TYPE_CHIPS: { value: TypeFilter; label: string }[] = [
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: 'next', label: '次回予定が近い順' },
-  { value: 'deadline', label: '締切が近い順' },
   { value: 'name', label: '企業名順' },
 ]
 

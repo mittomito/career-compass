@@ -12,11 +12,14 @@ export const STATUS_STYLES: Record<CompanyStatus, { fg: string; bg: string }> = 
   面接結果待ち: { fg: '#C07C1B', bg: '#FCF3E3' },
   内定: { fg: '#FFFFFF', bg: '#0F9B6C' },
   不合格: { fg: '#8896AC', bg: '#F1F4F8' },
+  辞退: { fg: '#7A6E8E', bg: '#F0EDF6' },
 }
 
 /** カレンダー・予定リストの色分け */
 export const KIND_STYLES: Record<EventKind, { main: string; fg: string; bg: string }> = {
-  締切: { main: '#E2554D', fg: '#E2554D', bg: '#FDEDEC' },
+  ES: { main: '#8B5CF6', fg: '#7C3AED', bg: '#F3EEFE' },
+  GD: { main: '#D946A6', fg: '#C02690', bg: '#FCEAF6' },
+  動画選考: { main: '#E07A2F', fg: '#C4641D', bg: '#FBEFE3' },
   面接: { main: '#2F6BEF', fg: '#2F6BEF', bg: '#EBF1FE' },
   Webテスト: { main: '#0F9B6C', fg: '#0B8A80', bg: '#E2F4F2' },
   その他: { main: '#D9A400', fg: '#A67E00', bg: '#FBF5DC' },
@@ -42,6 +45,9 @@ export const FLOW_PRESETS = [
 export const SCHEDULE_TYPE_PRESETS = [
   '面接',
   'Webテスト',
+  'ES',
+  'GD',
+  '動画選考',
   '説明会',
   '面談',
   'OB・OG訪問',
@@ -60,8 +66,11 @@ export const INDUSTRIES = [
   'その他',
 ] as const
 
-/** インターン期間カレンダーで企業ごとに割り当てる色 */
-export const INTERNSHIP_PALETTE = [
+/**
+ * インターン期間カレンダーの企業色パレット。
+ * 企業の「表示色」の選択肢でもあり、未設定企業への自動割り当てにも使う。
+ */
+export const COMPANY_COLOR_PALETTE = [
   '#2F6BEF',
   '#0F9B6C',
   '#C07C1B',
@@ -69,5 +78,7 @@ export const INTERNSHIP_PALETTE = [
   '#E2554D',
   '#0B8A80',
   '#D946A6',
+  '#D9A400',
+  '#E07A2F',
   '#6B7280',
 ] as const

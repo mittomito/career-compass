@@ -17,11 +17,13 @@ function makeCompany(over: Partial<Company> = {}): Company {
     flow: [],
     currentStepId: null,
     schedules: [],
-    deadlines: [],
     esEntries: [],
     interviews: [],
     research: emptyResearch(),
+    customResearch: [],
     internshipPeriods: [],
+    rejectionMemo: '',
+    color: '',
     ...over,
   }
 }

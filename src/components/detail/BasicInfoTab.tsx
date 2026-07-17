@@ -10,28 +10,40 @@ export default function BasicInfoTab({ company }: { company: Company }) {
   const { updateCompany } = useCompanies()
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState({
+    name: company.name,
     industry: company.industry,
     type: company.type,
     title: company.title,
     mypageUrl: company.mypageUrl,
     loginId: company.loginId,
     memo: company.memo,
+    rejectionMemo: company.rejectionMemo,
   })
+
+  // 不合格理由メモは、振り返りが必要になるステータスのときだけ表示する
+  const showRejectionMemo = company.status === '不合格' || company.status === '辞退'
 
   const startEdit = () => {
     setDraft({
+      name: company.name,
       industry: company.industry,
       type: company.type,
       title: company.title,
       mypageUrl: company.mypageUrl,
       loginId: company.loginId,
       memo: company.memo,
+      rejectionMemo: company.rejectionMemo,
     })
     setEditing(true)
   }
 
   const save = () => {
-    updateCompany(company.id, (c) => ({ ...c, ...draft }))
+    updateCompany(company.id, (c) => ({
+      ...c,
+      ...draft,
+      // 企業名を空にはできない。空で保存しようとした場合は元の名前を維持する
+      name: draft.name.trim() || c.name,
+    }))
     setEditing(false)
   }
 
@@ -48,6 +60,8 @@ export default function BasicInfoTab({ company }: { company: Company }) {
         }
       >
         <dl className="grid grid-cols-1 gap-x-4 gap-y-3 text-[15px] md:grid-cols-[150px_1fr]">
+          <dt className="pt-px text-[13px] font-bold text-ink-faint">企業名</dt>
+          <dd>{company.name}</dd>
           <dt className="pt-px text-[13px] font-bold text-ink-faint">業界</dt>
           <dd>{company.industry}</dd>
           <dt className="pt-px text-[13px] font-bold text-ink-faint">選考区分</dt>
@@ -87,6 +101,14 @@ export default function BasicInfoTab({ company }: { company: Company }) {
           <dd className="whitespace-pre-wrap break-words">
             {company.memo || <span className="text-ink-faint">—</span>}
           </dd>
+          {showRejectionMemo && (
+            <>
+              <dt className="pt-px text-[13px] font-bold text-ink-faint">不合格理由メモ</dt>
+              <dd className="whitespace-pre-wrap break-words">
+                {company.rejectionMemo || <span className="text-ink-faint">—</span>}
+              </dd>
+            </>
+          )}
         </dl>
         <p className="mt-4 text-xs text-ink-faint">
           ※ セキュリティのため、パスワードはこのアプリには保存できません。
@@ -98,6 +120,15 @@ export default function BasicInfoTab({ company }: { company: Company }) {
   return (
     <SectionCard title="基本情報を編集">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="md:col-span-2">
+          <label className="field-label">企業名 *</label>
+          <input
+            type="text"
+            className="input"
+            value={draft.name}
+            onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+          />
+        </div>
         <div>
           <label className="field-label">業界</label>
           <select
@@ -166,6 +197,17 @@ export default function BasicInfoTab({ company }: { company: Company }) {
             onChange={(e) => setDraft({ ...draft, memo: e.target.value })}
           />
         </div>
+        {showRejectionMemo && (
+          <div className="md:col-span-2">
+            <label className="field-label">不合格理由メモ</label>
+            <textarea
+              className="input min-h-[80px] resize-y"
+              placeholder="どの段階で・なぜ通らなかったか、次に活かせることなど"
+              value={draft.rejectionMemo}
+              onChange={(e) => setDraft({ ...draft, rejectionMemo: e.target.value })}
+            />
+          </div>
+        )}
       </div>
       <div className="mt-5 flex justify-end gap-2.5">
         <button type="button" className="btn-ghost" onClick={() => setEditing(false)}>

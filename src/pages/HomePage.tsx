@@ -6,7 +6,7 @@ import HomeToolbar, { type SortKey, type StatusFilter, type TypeFilter } from '.
 import OnboardingEmptyState from '../components/home/OnboardingEmptyState'
 import TodayStrip from '../components/home/TodayStrip'
 import { useCompanies } from '../hooks/useCompanies'
-import { nextDeadline, nextSchedule } from '../utils/events'
+import { nextSchedule } from '../utils/events'
 
 const FAR_FUTURE = 8_640_000_000_000_000 // 予定なしの企業を末尾に回すための番兵値
 
@@ -30,7 +30,6 @@ export default function HomePage() {
 
     const nextTime = (t?: { date: string }) => (t ? new Date(t.date).getTime() : FAR_FUTURE)
     if (sort === 'next') result.sort((a, b) => nextTime(nextSchedule(a)) - nextTime(nextSchedule(b)))
-    if (sort === 'deadline') result.sort((a, b) => nextTime(nextDeadline(a)) - nextTime(nextDeadline(b)))
     if (sort === 'name') result.sort((a, b) => a.name.localeCompare(b.name, 'ja'))
     return result
   }, [companies, query, typeFilter, statuses, sort])
