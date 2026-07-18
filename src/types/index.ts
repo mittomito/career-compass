@@ -66,6 +66,12 @@ export interface Interview {
   qas: InterviewQA[]
   reflection: string
   improvement: string
+  /**
+   * 次回の面接前にふと思い出したい一言（任意）。
+   * 自由記述のため分析ページの集計対象には含めない。
+   * 旧データには存在しないため optional にしている
+   */
+  nextNote?: string
 }
 
 export interface InternshipPeriod {
@@ -145,6 +151,23 @@ export interface Company {
   internshipPeriods: InternshipPeriod[]
   /** ステータスが「不合格」「辞退」のときだけ使う振り返りメモ */
   rejectionMemo: string
+  /**
+   * 選考が終わった（不合格・辞退した）選考フロー上のステップの id。
+   * 自動判定はせず、ユーザーが振り返りタブで手動選択する。未選択は null。
+   * フロー編集で該当ステップが削除された場合は「未選択」として扱う
+   */
+  rejectedStepId: string | null
+  /**
+   * 敗因タグ。プリセット（REJECTION_TAG_PRESETS）に加えて自由入力のタグも
+   * そのまま文字列として持つ。ステータスが「不合格」「辞退」のときだけ使う
+   */
+  rejectionTags: string[]
+  /**
+   * 企業を登録した日時（ISO 8601 文字列）。月別の応募数の集計に使う。
+   * このフィールド追加より前に作られたドキュメントには存在しないため、
+   * 欠損時は空文字（分析側で最初の予定日にフォールバック）
+   */
+  createdAt: string
   /** インターン期間カレンダーの表示色。空文字なら自動割り当て */
   color: string
   ownerId?: string

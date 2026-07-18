@@ -35,6 +35,9 @@ function makeCompany(over: Partial<Company> = {}): Company {
     customResearch: [],
     internshipPeriods: [],
     rejectionMemo: '',
+    rejectedStepId: null,
+    rejectionTags: [],
+    createdAt: '',
     color: '',
     ...over,
   }

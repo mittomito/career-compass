@@ -11,6 +11,9 @@ describe('normalizeCompany', () => {
     expect(c.prepNodes).toEqual([])
     expect(c.customResearch).toEqual([])
     expect(c.rejectionMemo).toBe('')
+    expect(c.rejectedStepId).toBeNull()
+    expect(c.rejectionTags).toEqual([])
+    expect(c.createdAt).toBe('')
     expect(c.color).toBe('')
     for (const cat of RESEARCH_CATEGORIES) {
       expect(c.research[cat]).toEqual({ url: '', summary: '', memo: '' })
@@ -26,6 +29,19 @@ describe('normalizeCompany', () => {
     })
     expect(c.esEntries).toHaveLength(1)
     expect(c.esEntries[0].limit).toBe(400)
+  })
+
+  it('振り返りフィールドを持たない既存の不合格企業も安全に読み込める', () => {
+    const c = normalizeCompany('id1', {
+      name: '既存企業',
+      status: '不合格',
+      rejectionMemo: '面接で緊張してしまった',
+    })
+    expect(c.status).toBe('不合格')
+    expect(c.rejectionMemo).toBe('面接で緊張してしまった')
+    expect(c.rejectedStepId).toBeNull()
+    expect(c.rejectionTags).toEqual([])
+    expect(c.createdAt).toBe('')
   })
 
   it('旧「締切」を予定に変換して統合する', () => {

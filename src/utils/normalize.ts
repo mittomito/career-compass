@@ -53,6 +53,9 @@ export function normalizeCompany(id: string, data: StoredCompany): Company {
     customResearch: data.customResearch ?? [],
     internshipPeriods: data.internshipPeriods ?? [],
     rejectionMemo: data.rejectionMemo ?? '',
+    rejectedStepId: data.rejectedStepId ?? null,
+    rejectionTags: data.rejectionTags ?? [],
+    createdAt: data.createdAt ?? '',
     color: data.color ?? '',
     ownerId: data.ownerId,
   }

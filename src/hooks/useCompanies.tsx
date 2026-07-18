@@ -88,6 +88,9 @@ export function CompaniesProvider({ children }: { children: ReactNode }) {
       customResearch: [],
       internshipPeriods: [],
       rejectionMemo: '',
+      rejectedStepId: null,
+      rejectionTags: [],
+      createdAt: new Date().toISOString(),
       color: '',
       // Firestore 側にのみ持たせる、データの持ち主を示すフィールド
       ownerId: user.uid,

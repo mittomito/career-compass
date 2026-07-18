@@ -54,6 +54,17 @@ export const SCHEDULE_TYPE_PRESETS = [
   'その他',
 ] as const
 
+/** 敗因タグのプリセット（振り返りタブで自由入力のタグも追加できる） */
+export const REJECTION_TAG_PRESETS = [
+  'ES',
+  'Webテスト',
+  'GD',
+  '面接(受け答え)',
+  '面接(社風・価値観の不一致)',
+  '準備不足',
+  'その他',
+] as const
+
 export const INDUSTRIES = [
   'IT・通信',
   'メーカー',

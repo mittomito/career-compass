@@ -17,11 +17,7 @@ export default function BasicInfoTab({ company }: { company: Company }) {
     mypageUrl: company.mypageUrl,
     loginId: company.loginId,
     memo: company.memo,
-    rejectionMemo: company.rejectionMemo,
   })
-
-  // 不合格理由メモは、振り返りが必要になるステータスのときだけ表示する
-  const showRejectionMemo = company.status === '不合格' || company.status === '辞退'
 
   const startEdit = () => {
     setDraft({
@@ -32,7 +28,6 @@ export default function BasicInfoTab({ company }: { company: Company }) {
       mypageUrl: company.mypageUrl,
       loginId: company.loginId,
       memo: company.memo,
-      rejectionMemo: company.rejectionMemo,
     })
     setEditing(true)
   }
@@ -101,14 +96,6 @@ export default function BasicInfoTab({ company }: { company: Company }) {
           <dd className="whitespace-pre-wrap break-words">
             {company.memo || <span className="text-ink-faint">—</span>}
           </dd>
-          {showRejectionMemo && (
-            <>
-              <dt className="pt-px text-[13px] font-bold text-ink-faint">不合格理由メモ</dt>
-              <dd className="whitespace-pre-wrap break-words">
-                {company.rejectionMemo || <span className="text-ink-faint">—</span>}
-              </dd>
-            </>
-          )}
         </dl>
         <p className="mt-4 text-xs text-ink-faint">
           ※ セキュリティのため、パスワードはこのアプリには保存できません。
@@ -197,17 +184,6 @@ export default function BasicInfoTab({ company }: { company: Company }) {
             onChange={(e) => setDraft({ ...draft, memo: e.target.value })}
           />
         </div>
-        {showRejectionMemo && (
-          <div className="md:col-span-2">
-            <label className="field-label">不合格理由メモ</label>
-            <textarea
-              className="input min-h-[80px] resize-y"
-              placeholder="どの段階で・なぜ通らなかったか、次に活かせることなど"
-              value={draft.rejectionMemo}
-              onChange={(e) => setDraft({ ...draft, rejectionMemo: e.target.value })}
-            />
-          </div>
-        )}
       </div>
       <div className="mt-5 flex justify-end gap-2.5">
         <button type="button" className="btn-ghost" onClick={() => setEditing(false)}>

@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import RedirectIfAuthed from './components/common/RedirectIfAuthed'
 import RequireAuth from './components/common/RequireAuth'
 import AppLayout from './layouts/AppLayout'
+import AnalysisPage from './pages/AnalysisPage'
 import CalendarPage from './pages/CalendarPage'
 import CompanyDetailPage from './pages/CompanyDetailPage'
 import HomePage from './pages/HomePage'
@@ -48,6 +49,7 @@ export default function App() {
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/internships" element={<InternshipCalendarPage />} />
         <Route path="/interview-prep" element={<InterviewPrepPage />} />
+        <Route path="/analysis" element={<AnalysisPage />} />
         <Route path="/account" element={<AccountSettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
