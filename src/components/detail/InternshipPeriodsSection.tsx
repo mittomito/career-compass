@@ -1,6 +1,6 @@
 import { Check, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { COMPANY_COLOR_PALETTE } from '../../data/constants'
+import { COMPANY_COLOR_PALETTE, MAX_LEN } from '../../data/constants'
 import { useCompanies } from '../../hooks/useCompanies'
 import type { Company } from '../../types'
 import { fmtMD } from '../../utils/date'
@@ -104,6 +104,7 @@ export default function InternshipPeriodsSection({ company }: { company: Company
               type="text"
               className="input"
               placeholder="例：本選考直結コース"
+              maxLength={MAX_LEN.short}
               value={form.label}
               onChange={(e) => setForm({ ...form, label: e.target.value })}
             />

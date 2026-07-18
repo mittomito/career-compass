@@ -1,9 +1,11 @@
 import { ChevronDown, Plus, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
+import { MAX_LEN } from '../../data/constants'
 import { useCompanies } from '../../hooks/useCompanies'
 import type { Company, InterviewQA } from '../../types'
 import { fmtMD } from '../../utils/date'
 import { uid } from '../../utils/id'
+import CharCount from '../common/CharCount'
 import SectionCard from '../common/SectionCard'
 import RejectionReflectionSection from './RejectionReflectionSection'
 
@@ -55,15 +57,18 @@ function InterviewForm({
               type="text"
               className="input mb-2"
               placeholder={`質問 ${i + 1}（例：学生時代に頑張ったことは？）`}
+              maxLength={MAX_LEN.question}
               value={qa.question}
               onChange={(e) => setQa(i, { question: e.target.value })}
             />
             <textarea
               className="input min-h-[60px] resize-y"
               placeholder="自分の回答・手応え"
+              maxLength={MAX_LEN.answer}
               value={qa.answer}
               onChange={(e) => setQa(i, { answer: e.target.value })}
             />
+            <CharCount value={qa.answer} max={MAX_LEN.answer} />
           </div>
         ))}
       </div>
@@ -76,17 +81,21 @@ function InterviewForm({
           <label className="field-label">反省</label>
           <textarea
             className="input min-h-[70px] resize-y"
+            maxLength={MAX_LEN.memo}
             value={reflection}
             onChange={(e) => setReflection(e.target.value)}
           />
+          <CharCount value={reflection} max={MAX_LEN.memo} />
         </div>
         <div>
           <label className="field-label">次回改善点</label>
           <textarea
             className="input min-h-[70px] resize-y"
+            maxLength={MAX_LEN.memo}
             value={improvement}
             onChange={(e) => setImprovement(e.target.value)}
           />
+          <CharCount value={improvement} max={MAX_LEN.memo} />
         </div>
       </div>
       <div className="mt-3">
@@ -95,6 +104,7 @@ function InterviewForm({
           type="text"
           className="input"
           placeholder="（任意）次回はここを意識したい、と思ったことがあれば"
+          maxLength={MAX_LEN.note}
           value={nextNote}
           onChange={(e) => setNextNote(e.target.value)}
         />

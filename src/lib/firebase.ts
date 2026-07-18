@@ -1,6 +1,10 @@
 import { initializeApp } from 'firebase/app'
 import { browserLocalPersistence, getAuth, setPersistence } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
+import {
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+} from 'firebase/firestore'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -15,4 +19,11 @@ const app = initializeApp(firebaseConfig)
 
 export const auth = getAuth(app)
 setPersistence(auth, browserLocalPersistence)
-export const db = getFirestore(app)
+
+// オフラインキャッシュ（IndexedDB）を有効化する。
+// 2回目以降の表示はキャッシュから即座に返り、サーバーからは差分のみ読むため、
+// 読み取り課金と初回表示時間の両方を削減できる。
+// persistentMultipleTabManager: 複数タブで開いてもキャッシュを共有し、エラーにしない
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+})

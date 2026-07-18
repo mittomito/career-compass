@@ -3,3 +3,7 @@ dist
 *.local
 .DS_Store
 .env
+
+# バックアップ用の機密ファイル・出力先（絶対にコミットしない）
+serviceAccountKey.json
+backups/

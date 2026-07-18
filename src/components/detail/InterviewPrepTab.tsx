@@ -9,13 +9,18 @@ import PrepTreeSection from '../prep/PrepTreeSection'
 export default function InterviewPrepTab({ company }: { company: Company }) {
   const { updateCompany } = useCompanies()
   // アカウント共通のテンプレート。ここでは読み取り（コピー元）としてだけ使う
-  const { nodes: templateNodes, loading: templateLoading } = useInterviewPrep()
+  const { nodes: templateNodes, loading: templateLoading, error: templateError } = useInterviewPrep()
 
   const updateNodes = (updater: (nodes: PrepNode[]) => PrepNode[]) => {
     updateCompany(company.id, (c) => ({ ...c, prepNodes: updater(c.prepNodes) }))
   }
 
   const copyTemplate = () => {
+    // 読み込み失敗中は「テンプレートが空」と誤認させないよう、専用の案内を出す
+    if (templateError) {
+      alert('面接対策テンプレートの読み込みに失敗しています。ページを再読み込みしてからお試しください。')
+      return
+    }
     if (templateNodes.length === 0) {
       alert(
         '面接対策テンプレートに質問が登録されていません。ヘッダーの「面接対策」からテンプレートを作成できます。',

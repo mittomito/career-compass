@@ -1,6 +1,6 @@
 import { ArrowDown, ArrowUp, Check, Plus, Settings2, Trash2 } from 'lucide-react'
 import { Fragment, useState } from 'react'
-import { FLOW_PRESETS } from '../../data/constants'
+import { FLOW_PRESETS, MAX_LEN } from '../../data/constants'
 import { useCompanies } from '../../hooks/useCompanies'
 import type { Company } from '../../types'
 import { uid } from '../../utils/id'
@@ -169,6 +169,7 @@ export default function FlowEditor({ company }: { company: Company }) {
               className="input flex-1"
               list="flow-presets"
               placeholder="ステップ名（例：一次面接）を入力または選択"
+              maxLength={MAX_LEN.label}
               value={newLabel}
               onChange={(e) => setNewLabel(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addStep()}

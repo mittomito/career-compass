@@ -13,6 +13,7 @@ import PasswordResetPage from './pages/PasswordResetPage'
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 import RegisterPage from './pages/RegisterPage'
 import SignUpPage from './pages/SignUpPage'
+import TermsPage from './pages/TermsPage'
 import AccountSettingsPage from './pages/AccountSettingsPage'
 
 export default function App() {
@@ -36,6 +37,7 @@ export default function App() {
       />
       <Route path="/reset-password" element={<PasswordResetPage />} />
       <Route path="/privacy" element={<PrivacyPolicyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
       <Route
         element={
           <RequireAuth>

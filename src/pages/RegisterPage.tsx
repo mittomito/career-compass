@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { INDUSTRIES } from '../data/constants'
+import { INDUSTRIES, MAX_LEN } from '../data/constants'
 import { useCompanies } from '../hooks/useCompanies'
 import type { SelectionType } from '../types'
 
@@ -53,6 +53,7 @@ export default function RegisterPage() {
             type="text"
             className={`input ${error ? 'border-danger' : ''}`}
             placeholder="例：株式会社〇〇"
+            maxLength={MAX_LEN.short}
             value={name}
             onChange={(e) => {
               setName(e.target.value)
@@ -99,6 +100,7 @@ export default function RegisterPage() {
             type="text"
             className="input"
             placeholder="例：夏季インターンシップ2026"
+            maxLength={MAX_LEN.short}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />

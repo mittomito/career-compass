@@ -1,12 +1,17 @@
+import LoadErrorState from '../components/common/LoadErrorState'
 import LoadingState from '../components/common/LoadingState'
 import PrepTreeSection from '../components/prep/PrepTreeSection'
 import { useInterviewPrep } from '../hooks/useInterviewPrep'
 
 export default function InterviewPrepPage() {
-  const { nodes, loading, updateNodes } = useInterviewPrep()
+  const { nodes, loading, error, retry, updateNodes } = useInterviewPrep()
 
   if (loading) {
     return <LoadingState label="面接対策テンプレートを読み込み中…" />
+  }
+
+  if (error) {
+    return <LoadErrorState title="面接対策テンプレートの読み込みに失敗しました" onRetry={retry} />
   }
 
   return (

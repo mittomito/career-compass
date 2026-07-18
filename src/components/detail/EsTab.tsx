@@ -1,5 +1,6 @@
 import { ChevronDown, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { MAX_LEN } from '../../data/constants'
 import { useCompanies } from '../../hooks/useCompanies'
 import type { Company, EsEntry } from '../../types'
 import { uid } from '../../utils/id'
@@ -32,6 +33,7 @@ function EsForm({
         <textarea
           className="input min-h-[52px] resize-y"
           placeholder="例：学生時代に最も力を入れたことを教えてください。"
+          maxLength={MAX_LEN.question}
           value={draft.question}
           onChange={(e) => setDraft({ ...draft, question: e.target.value })}
         />
@@ -43,8 +45,10 @@ function EsForm({
             {draft.answer.length} / {draft.limit}字{over && '（超過）'}
           </span>
         </div>
+        {/* 設問ごとの字数制限（draft.limit）とは別に、保存できる長さ自体の上限も設ける */}
         <textarea
           className={`input min-h-[140px] resize-y ${over ? 'border-danger' : ''}`}
+          maxLength={MAX_LEN.answer}
           value={draft.answer}
           onChange={(e) => setDraft({ ...draft, answer: e.target.value })}
         />

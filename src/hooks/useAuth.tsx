@@ -4,6 +4,7 @@ import {
   EmailAuthProvider,
   onAuthStateChanged,
   reauthenticateWithCredential,
+  sendEmailVerification,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
@@ -19,6 +20,8 @@ interface AuthStore {
   register: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
+  /** 確認メールを（再）送信する。未ログインなら何もしない */
+  resendVerification: () => Promise<void>
   reauthenticate: (password: string) => Promise<void>
   deleteAccount: () => Promise<void>
 }
@@ -43,7 +46,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const register = async (email: string, password: string) => {
-    await createUserWithEmailAndPassword(auth, email, password)
+    const cred = await createUserWithEmailAndPassword(auth, email, password)
+    // メールアドレスの typo に気づけるよう確認メールを送る。
+    // 送信失敗で登録自体を失敗にはしない（アプリ内バナーから再送できる）
+    try {
+      await sendEmailVerification(cred.user)
+    } catch (err) {
+      console.error('確認メールの送信に失敗しました', err)
+    }
   }
 
   const logout = async () => {
@@ -52,6 +62,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resetPassword = async (email: string) => {
     await sendPasswordResetEmail(auth, email)
+  }
+
+  const resendVerification = async () => {
+    if (!auth.currentUser) return
+    await sendEmailVerification(auth.currentUser)
   }
 
   /** アカウント削除などの機微な操作の前に、パスワードで本人確認を行う */
@@ -67,7 +82,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const value = useMemo(
-    () => ({ user, loading, login, register, logout, resetPassword, reauthenticate, deleteAccount }),
+    () => ({
+      user,
+      loading,
+      login,
+      register,
+      logout,
+      resetPassword,
+      resendVerification,
+      reauthenticate,
+      deleteAccount,
+    }),
     [user, loading],
   )
 

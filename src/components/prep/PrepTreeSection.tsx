@@ -1,8 +1,10 @@
 import { ChevronDown, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState, type Dispatch, type ReactNode, type SetStateAction } from 'react'
+import { MAX_LEN } from '../../data/constants'
 import type { PrepNode } from '../../types'
 import { uid } from '../../utils/id'
 import { childrenOf, collectDescendantIds, removeWithDescendants } from '../../utils/prepTree'
+import CharCount from '../common/CharCount'
 import SectionCard from '../common/SectionCard'
 
 interface PrepDraft {
@@ -34,6 +36,7 @@ function NodeForm({
         <textarea
           className="input min-h-[52px] resize-y"
           placeholder="例：なぜそう考えたのですか？"
+          maxLength={MAX_LEN.question}
           value={draft.question}
           onChange={(e) => setDraft({ ...draft, question: e.target.value })}
         />
@@ -43,9 +46,11 @@ function NodeForm({
         <textarea
           className="input min-h-[100px] resize-y"
           placeholder="想定している自分の回答"
+          maxLength={MAX_LEN.answer}
           value={draft.answer}
           onChange={(e) => setDraft({ ...draft, answer: e.target.value })}
         />
+        <CharCount value={draft.answer} max={MAX_LEN.answer} />
       </div>
       <div className="mt-3 flex justify-end gap-2">
         <button type="button" className="btn-ghost" onClick={onCancel}>

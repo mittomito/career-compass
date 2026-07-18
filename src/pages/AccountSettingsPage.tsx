@@ -124,9 +124,12 @@ export default function AccountSettingsPage() {
           </div>
         )}
       </div>
-      <p className="mt-6 text-center text-xs text-ink-faint">
+      <p className="mt-6 flex justify-center gap-4 text-center text-xs text-ink-faint">
+        <Link to="/terms" className="hover:underline">
+          利用規約
+        </Link>
         <Link to="/privacy" className="hover:underline">
-          プライバシーポリシーを確認する
+          プライバシーポリシー
         </Link>
       </p>
     </div>

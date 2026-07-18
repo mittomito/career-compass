@@ -1,6 +1,6 @@
 import { AlertTriangle, ExternalLink, MapPin, Plus, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
-import { KIND_STYLES, SCHEDULE_TYPE_PRESETS } from '../../data/constants'
+import { KIND_STYLES, MAX_LEN, SCHEDULE_TYPE_PRESETS } from '../../data/constants'
 import { useCompanies } from '../../hooks/useCompanies'
 import type { Company, Schedule } from '../../types'
 import { daysLeft, fmtMDT, relLabel } from '../../utils/date'
@@ -93,6 +93,7 @@ export default function ScheduleSection({ company }: { company: Company }) {
               className="input"
               list="schedule-presets"
               placeholder="例：一次面接"
+              maxLength={MAX_LEN.label}
               value={form.type}
               onChange={(e) => setForm({ ...form, type: e.target.value })}
             />
@@ -140,6 +141,7 @@ export default function ScheduleSection({ company }: { company: Company }) {
               type="text"
               className="input"
               placeholder="例：本社 / オンライン"
+              maxLength={MAX_LEN.short}
               value={form.place}
               onChange={(e) => setForm({ ...form, place: e.target.value })}
             />
@@ -150,6 +152,7 @@ export default function ScheduleSection({ company }: { company: Company }) {
               type="url"
               className="input"
               placeholder="https://"
+              maxLength={MAX_LEN.url}
               value={form.url}
               onChange={(e) => setForm({ ...form, url: e.target.value })}
             />
@@ -160,6 +163,7 @@ export default function ScheduleSection({ company }: { company: Company }) {
               type="text"
               className="input"
               placeholder="持ち物、注意点など"
+              maxLength={MAX_LEN.note}
               value={form.memo}
               onChange={(e) => setForm({ ...form, memo: e.target.value })}
             />

@@ -1,5 +1,6 @@
 import { ChevronDown, ExternalLink, Plus, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { MAX_LEN } from '../../data/constants'
 import { useCompanies } from '../../hooks/useCompanies'
 import {
   RESEARCH_CATEGORIES,
@@ -11,6 +12,7 @@ import {
 } from '../../types'
 import { uid } from '../../utils/id'
 import { safeExternalHref } from '../../utils/url'
+import CharCount from '../common/CharCount'
 import SectionCard from '../common/SectionCard'
 
 function hasContent(e: { url: string; summary: string; memo: string }): boolean {
@@ -55,6 +57,7 @@ function EntryFields({
           type="url"
           className="input"
           placeholder="https://（参照した記事・ページ）"
+          maxLength={MAX_LEN.url}
           value={entry.url}
           onChange={(e) => onChange({ url: e.target.value })}
         />
@@ -64,18 +67,22 @@ function EntryFields({
         <textarea
           className="input min-h-[70px] resize-y"
           placeholder="内容の要点を短くまとめる"
+          maxLength={MAX_LEN.memo}
           value={entry.summary}
           onChange={(e) => onChange({ summary: e.target.value })}
         />
+        <CharCount value={entry.summary} max={MAX_LEN.memo} />
       </div>
       <div>
         <label className="field-label">自分のメモ</label>
         <textarea
           className="input min-h-[70px] resize-y"
           placeholder="感じたこと、面接でどう使うか、志望理由との接続など"
+          maxLength={MAX_LEN.memo}
           value={entry.memo}
           onChange={(e) => onChange({ memo: e.target.value })}
         />
+        <CharCount value={entry.memo} max={MAX_LEN.memo} />
       </div>
     </div>
   )
@@ -254,6 +261,7 @@ export default function ResearchTab({ company }: { company: Company }) {
           type="text"
           className="input flex-1"
           placeholder="カテゴリを追加（例：中期経営計画）"
+          maxLength={MAX_LEN.label}
           value={newCatName}
           onChange={(e) => setNewCatName(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && addCustomCategory()}

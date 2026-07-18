@@ -1,9 +1,10 @@
 import { Plus } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { REJECTION_TAG_PRESETS } from '../../data/constants'
+import { MAX_LEN, REJECTION_TAG_PRESETS } from '../../data/constants'
 import { useCompanies } from '../../hooks/useCompanies'
 import type { Company } from '../../types'
 import { uid } from '../../utils/id'
+import CharCount from '../common/CharCount'
 import SectionCard from '../common/SectionCard'
 
 /** 連続入力をまとめて保存するまでの待ち時間（企業研究タブと同じ運用） */
@@ -185,6 +186,7 @@ export default function RejectionReflectionSection({ company }: { company: Compa
               type="text"
               className="input flex-1"
               placeholder="タグを追加（例：逆質問）"
+              maxLength={MAX_LEN.label}
               value={newTag}
               onChange={(e) => setNewTag(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addTag()}
@@ -206,9 +208,11 @@ export default function RejectionReflectionSection({ company }: { company: Compa
           <textarea
             className="input min-h-[90px] resize-y"
             placeholder="どの段階で・なぜ通らなかったか、次に活かせることなど"
+            maxLength={MAX_LEN.memo}
             value={memo}
             onChange={(e) => changeMemo(e.target.value)}
           />
+          <CharCount value={memo} max={MAX_LEN.memo} />
         </div>
       </div>
     </SectionCard>

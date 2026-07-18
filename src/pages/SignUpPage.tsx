@@ -134,6 +134,10 @@ export default function SignUpPage() {
         </p>
         <p className="mt-3 text-center text-xs text-ink-faint">
           登録すると{' '}
+          <Link to="/terms" className="font-semibold hover:underline">
+            利用規約
+          </Link>
+          と{' '}
           <Link to="/privacy" className="font-semibold hover:underline">
             プライバシーポリシー
           </Link>

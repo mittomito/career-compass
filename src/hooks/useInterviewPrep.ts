@@ -23,6 +23,9 @@ export function useInterviewPrep() {
   const { user } = useAuth()
   const [nodes, setNodes] = useState<PrepNode[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+  // 再試行のたびに増やして useEffect を再実行し、購読を張り直す
+  const [reloadKey, setReloadKey] = useState(0)
   // 「未作成 → 雛形を保存」を購読中に何度も繰り返さないためのフラグ
   const seededRef = useRef(false)
   // 旧雛形の掃除の書き戻しを 1 回に留めるフラグ（失敗しても表示上は除去済みになる）
@@ -32,9 +35,11 @@ export function useInterviewPrep() {
     if (!user) {
       setNodes([])
       setLoading(false)
+      setError(false)
       return
     }
     setLoading(true)
+    setError(false)
     const ref = doc(db, COLLECTION, user.uid)
     const unsubscribe = onSnapshot(
       ref,
@@ -57,6 +62,7 @@ export function useInterviewPrep() {
         const pruned = pruneLegacySeeds(stored)
         setNodes(pruned)
         setLoading(false)
+        setError(false)
         if (pruned.length !== stored.length && !prunedRef.current) {
           prunedRef.current = true
           updateDoc(ref, { nodes: pruned }).catch((err) => {
@@ -65,23 +71,31 @@ export function useInterviewPrep() {
         }
       },
       (err) => {
+        // onSnapshot がエラーを返すと購読は停止するため、
+        // 「テンプレートが空」と区別できるエラー状態にして再試行を促す
         console.error('面接対策テンプレートの取得に失敗しました', err)
         setLoading(false)
+        setError(true)
       },
     )
     return unsubscribe
-  }, [user])
+  }, [user, reloadKey])
+
+  const retry = () => setReloadKey((k) => k + 1)
 
   // 楽観的更新：Firestore への書き込みが完了する前に画面上は即座に反映する
   const updateNodes = (updater: (nodes: PrepNode[]) => PrepNode[]) => {
     if (!user) return
-    const next = updater(nodes)
+    const current = nodes
+    const next = updater(current)
     setNodes(next)
     updateDoc(doc(db, COLLECTION, user.uid), { nodes: next }).catch((err) => {
       console.error('面接対策テンプレートの更新に失敗しました', err)
-      alert('データの保存に失敗しました。通信環境をご確認の上、もう一度お試しください。')
+      // 「保存された」と誤解しないよう、画面表示を変更前の状態に戻す
+      setNodes(current)
+      alert('データの保存に失敗しました。変更前の状態に戻しました。通信環境をご確認の上、もう一度お試しください。')
     })
   }
 
-  return { nodes, loading, updateNodes }
+  return { nodes, loading, error, retry, updateNodes }
 }

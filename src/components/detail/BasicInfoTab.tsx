@@ -1,6 +1,7 @@
 import { ExternalLink, Pencil } from 'lucide-react'
 import { useState } from 'react'
-import { INDUSTRIES } from '../../data/constants'
+import { INDUSTRIES, MAX_LEN } from '../../data/constants'
+import CharCount from '../common/CharCount'
 import { useCompanies } from '../../hooks/useCompanies'
 import type { Company, SelectionType } from '../../types'
 import { safeExternalHref } from '../../utils/url'
@@ -112,6 +113,7 @@ export default function BasicInfoTab({ company }: { company: Company }) {
           <input
             type="text"
             className="input"
+            maxLength={MAX_LEN.short}
             value={draft.name}
             onChange={(e) => setDraft({ ...draft, name: e.target.value })}
           />
@@ -152,6 +154,7 @@ export default function BasicInfoTab({ company }: { company: Company }) {
           <input
             type="text"
             className="input"
+            maxLength={MAX_LEN.short}
             value={draft.title}
             onChange={(e) => setDraft({ ...draft, title: e.target.value })}
           />
@@ -162,6 +165,7 @@ export default function BasicInfoTab({ company }: { company: Company }) {
             type="url"
             className="input"
             placeholder="https://"
+            maxLength={MAX_LEN.url}
             value={draft.mypageUrl}
             onChange={(e) => setDraft({ ...draft, mypageUrl: e.target.value })}
           />
@@ -171,6 +175,7 @@ export default function BasicInfoTab({ company }: { company: Company }) {
           <input
             type="text"
             className="input"
+            maxLength={MAX_LEN.short}
             value={draft.loginId}
             onChange={(e) => setDraft({ ...draft, loginId: e.target.value })}
           />
@@ -180,9 +185,11 @@ export default function BasicInfoTab({ company }: { company: Company }) {
           <label className="field-label">メモ</label>
           <textarea
             className="input min-h-[80px] resize-y"
+            maxLength={MAX_LEN.memo}
             value={draft.memo}
             onChange={(e) => setDraft({ ...draft, memo: e.target.value })}
           />
+          <CharCount value={draft.memo} max={MAX_LEN.memo} />
         </div>
       </div>
       <div className="mt-5 flex justify-end gap-2.5">

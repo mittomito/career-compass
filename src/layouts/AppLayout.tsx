@@ -14,11 +14,13 @@ import {
 import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import BrandMark from '../components/common/BrandMark'
+import EmailVerificationBanner from '../components/common/EmailVerificationBanner'
+import LoadErrorState from '../components/common/LoadErrorState'
 import { useAuth } from '../hooks/useAuth'
 import { useCompanies } from '../hooks/useCompanies'
 
 export default function AppLayout() {
-  const { companies } = useCompanies()
+  const { companies, error: companiesError, retry } = useCompanies()
   const { logout } = useAuth()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -205,8 +207,11 @@ export default function AppLayout() {
           )}
         </div>
       </header>
+      <EmailVerificationBanner />
       <main className="mx-auto max-w-5xl px-4 pb-24 pt-5 sm:px-6 sm:pt-7">
-        <Outlet />
+        {/* 購読が失敗した状態で各ページを出すと「0社」の画面と区別がつかないため、
+            ここで全ページ共通のエラー画面に差し替える */}
+        {companiesError ? <LoadErrorState title="企業データの読み込みに失敗しました" onRetry={retry} /> : <Outlet />}
       </main>
     </div>
   )
