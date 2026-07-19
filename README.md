@@ -26,6 +26,7 @@
 | ルーティング | React Router v6 |
 | バックエンド | Firebase Authentication / Cloud Firestore |
 | テスト | Vitest（ユーティリティ層の単体テスト） |
+| CI | GitHub Actions（push / PR ごとに lint・テスト・型チェック + ビルドを Node 24 で実行） |
 | ホスティング | Firebase Hosting |
 
 ### 設計上のポイント
