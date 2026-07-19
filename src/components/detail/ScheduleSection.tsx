@@ -34,14 +34,20 @@ export default function ScheduleSection({ company }: { company: Company }) {
 
   // 旧「締切」から移行された予定（id が dl- で始まる）を削除するときは、
   // 変換元の deadlines も一緒に取り除き、次回読み込みで復活しないようにする
-  const removeSchedule = (id: string) =>
+  const removeSchedule = (schedule: Schedule) => {
+    // 候補日を複数登録した予定は再入力の手間が大きいため、件数まで示して確認する
+    const dateCount = scheduleDates(schedule).length
+    const label =
+      dateCount > 1 ? `「${schedule.type}」（候補日${dateCount}件）` : `「${schedule.type}」`
+    if (!window.confirm(`${label}を削除しますか？この操作は取り消せません。`)) return
     updateCompany(company.id, (c) => ({
       ...c,
-      schedules: c.schedules.filter((s) => s.id !== id),
-      deadlines: id.startsWith('dl-')
-        ? c.deadlines?.filter((d) => `dl-${d.id}` !== id)
+      schedules: c.schedules.filter((s) => s.id !== schedule.id),
+      deadlines: schedule.id.startsWith('dl-')
+        ? c.deadlines?.filter((d) => `dl-${d.id}` !== schedule.id)
         : c.deadlines,
     }))
+  }
 
   const schedules = [...company.schedules].sort(
     (a, b) =>
@@ -132,7 +138,7 @@ export default function ScheduleSection({ company }: { company: Company }) {
                 <button
                   type="button"
                   className="icon-btn hover:border-danger hover:bg-danger-soft hover:text-danger"
-                  onClick={() => removeSchedule(s.id)}
+                  onClick={() => removeSchedule(s)}
                   aria-label="この予定を削除"
                 >
                   <Trash2 size={14} />

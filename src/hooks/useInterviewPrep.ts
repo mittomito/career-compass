@@ -1,7 +1,7 @@
 import { deleteDoc, doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore'
 import { useEffect, useRef, useState } from 'react'
 import { pruneLegacySeeds, seedPrepNodes } from '../data/interviewPrep'
-import { db } from '../lib/firebase'
+import { db } from '../lib/db'
 import type { PrepNode } from '../types'
 import { useAuth } from './useAuth'
 

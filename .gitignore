@@ -7,3 +7,5 @@ dist
 # バックアップ用の機密ファイル・出力先（絶対にコミットしない）
 serviceAccountKey.json
 backups/
+# Firebase Hosting のデプロイキャッシュ（生成物）
+.firebase/

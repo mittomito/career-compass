@@ -1,4 +1,5 @@
-import { CalendarDays, ChevronLeft, Trash2 } from 'lucide-react'
+import { CalendarDays, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import EmptyState from '../components/common/EmptyState'
 import StatusBadge from '../components/common/StatusBadge'
@@ -31,6 +32,21 @@ export default function CompanyDetailPage() {
   const navigate = useNavigate()
   const { getCompany, updateCompany, removeCompany, loading } = useCompanies()
   const [params, setParams] = useSearchParams()
+
+  // タブが画面幅に収まらないとき（主にモバイル）、右端にスクロール可能のヒントを出す
+  const tabScrollRef = useRef<HTMLDivElement>(null)
+  const [tabHintVisible, setTabHintVisible] = useState(false)
+  const updateTabHint = () => {
+    const el = tabScrollRef.current
+    if (!el) return
+    // 右端までスクロールし切ったらヒントを消す（8px は誤差の吸収）
+    setTabHintVisible(el.scrollWidth - el.clientWidth - el.scrollLeft > 8)
+  }
+  useEffect(() => {
+    updateTabHint()
+    window.addEventListener('resize', updateTabHint)
+    return () => window.removeEventListener('resize', updateTabHint)
+  }, [loading])
 
   const company = id ? getCompany(id) : undefined
 
@@ -126,22 +142,35 @@ export default function CompanyDetailPage() {
         </div>
       </div>
 
-      <div className="sticky top-[60px] z-10 -mx-1 mt-6 overflow-x-auto bg-paper/95 px-1 py-2 backdrop-blur">
-        <div className="flex w-max gap-1 rounded-xl border border-line bg-white p-1 shadow-card">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              type="button"
-              onClick={() => changeTab(t.key)}
-              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
-                tab === t.key
-                  ? 'bg-brand text-white shadow-sm'
-                  : 'text-ink-sub hover:bg-brand-ghost hover:text-brand'
-              }`}
+      <div className="sticky top-[60px] z-10 -mx-1 mt-6 bg-paper/95 py-2 backdrop-blur">
+        <div className="relative">
+          <div ref={tabScrollRef} onScroll={updateTabHint} className="overflow-x-auto px-1">
+            <div className="flex w-max gap-1 rounded-xl border border-line bg-white p-1 shadow-card">
+              {TABS.map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => changeTab(t.key)}
+                  className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                    tab === t.key
+                      ? 'bg-brand text-white shadow-sm'
+                      : 'text-ink-sub hover:bg-brand-ghost hover:text-brand'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          {/* 右にまだタブがあることを示すフェード+矢印。スクロールし切ると消える */}
+          {tabHintVisible && (
+            <div
+              className="pointer-events-none absolute inset-y-0 right-0 flex items-center bg-gradient-to-l from-paper via-paper/70 to-transparent pl-10 pr-1"
+              aria-hidden="true"
             >
-              {t.label}
-            </button>
-          ))}
+              <ChevronRight size={15} className="text-ink-faint" />
+            </div>
+          )}
         </div>
       </div>
 

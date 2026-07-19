@@ -58,10 +58,10 @@ export function normalizeCompany(id: string, data: StoredCompany): Company {
     createdAt: data.createdAt ?? '',
     color: data.color ?? '',
     aspiration: data.aspiration ?? 0,
-    // qas はフィールド追加より前の訪問記録に存在しないため、訪問1件ずつ補完する
+    // qas などはフィールド追加より前の訪問記録に存在しないため、訪問1件ずつ補完する。
+    // スプレッドで元の値を保つことで、将来のバージョンが書いた未知のフィールドも失わない
     obogVisits: (data.obogVisits ?? []).map((v) => ({
-      id: v.id,
-      date: v.date,
+      ...v,
       person: v.person ?? '',
       qas: v.qas ?? [],
       memo: v.memo ?? '',

@@ -11,7 +11,7 @@ import {
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { emptyResearch } from '../data/research'
 import { useAuth } from './useAuth'
-import { db } from '../lib/firebase'
+import { db } from '../lib/db'
 import type { Company, NewCompanyInput } from '../types'
 import { changedTopLevelFields } from '../utils/diff'
 import { normalizeCompany, type StoredCompany } from '../utils/normalize'

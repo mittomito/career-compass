@@ -1,9 +1,9 @@
-import { ChevronDown, Plus, Trash2, X } from 'lucide-react'
+import { ChevronDown, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 import { MAX_LEN } from '../../data/constants'
 import { useCompanies } from '../../hooks/useCompanies'
-import type { Company, InterviewQA } from '../../types'
-import { fmtMD } from '../../utils/date'
+import type { Company, Interview, InterviewQA } from '../../types'
+import { fmtMD, toInputDate } from '../../utils/date'
 import { uid } from '../../utils/id'
 import CharCount from '../common/CharCount'
 import SectionCard from '../common/SectionCard'
@@ -11,10 +11,37 @@ import RejectionReflectionSection from './RejectionReflectionSection'
 
 const EMPTY_QA: InterviewQA = { question: '', answer: '' }
 
+interface InterviewDraft {
+  /** date 入力欄の形式（YYYY-MM-DD）。保存時に ISO へ変換する */
+  date: string
+  qas: InterviewQA[]
+  reflection: string
+  improvement: string
+  nextNote: string
+}
+
+function emptyDraft(): InterviewDraft {
+  return { date: '', qas: [{ ...EMPTY_QA }], reflection: '', improvement: '', nextNote: '' }
+}
+
+/** 保存済みの記録を編集用の下書きに変換する */
+function draftOf(iv: Interview): InterviewDraft {
+  return {
+    date: toInputDate(iv.date),
+    // 質問が空の記録でも、編集時は入力欄を1つは出す
+    qas: iv.qas.length > 0 ? iv.qas.map((qa) => ({ ...qa })) : [{ ...EMPTY_QA }],
+    reflection: iv.reflection,
+    improvement: iv.improvement,
+    nextNote: iv.nextNote ?? '',
+  }
+}
+
 function InterviewForm({
+  initial,
   onSave,
   onCancel,
 }: {
+  initial: InterviewDraft
   onSave: (draft: {
     date: string
     qas: InterviewQA[]
@@ -24,11 +51,11 @@ function InterviewForm({
   }) => void
   onCancel: () => void
 }) {
-  const [date, setDate] = useState('')
-  const [qas, setQas] = useState<InterviewQA[]>([{ ...EMPTY_QA }])
-  const [reflection, setReflection] = useState('')
-  const [improvement, setImprovement] = useState('')
-  const [nextNote, setNextNote] = useState('')
+  const [date, setDate] = useState(initial.date)
+  const [qas, setQas] = useState<InterviewQA[]>(initial.qas)
+  const [reflection, setReflection] = useState(initial.reflection)
+  const [improvement, setImprovement] = useState(initial.improvement)
+  const [nextNote, setNextNote] = useState(initial.nextNote)
 
   const setQa = (i: number, patch: Partial<InterviewQA>) =>
     setQas(qas.map((qa, j) => (j === i ? { ...qa, ...patch } : qa)))
@@ -136,10 +163,33 @@ function InterviewForm({
 
 export default function InterviewTab({ company }: { company: Company }) {
   const { updateCompany } = useCompanies()
-  const [adding, setAdding] = useState(false)
+  const [editingId, setEditingId] = useState<string | 'new' | null>(null)
   const [openIds, setOpenIds] = useState<Set<string>>(
     () => new Set(company.interviews.map((iv) => iv.id)),
   )
+
+  const save = (draft: {
+    date: string
+    qas: InterviewQA[]
+    reflection: string
+    improvement: string
+    nextNote: string
+  }) => {
+    if (editingId === 'new') {
+      const id = uid()
+      updateCompany(company.id, (c) => ({
+        ...c,
+        interviews: [...c.interviews, { id, ...draft }],
+      }))
+      setOpenIds((prev) => new Set(prev).add(id))
+    } else if (editingId) {
+      updateCompany(company.id, (c) => ({
+        ...c,
+        interviews: c.interviews.map((iv) => (iv.id === editingId ? { id: iv.id, ...draft } : iv)),
+      }))
+    }
+    setEditingId(null)
+  }
 
   const toggle = (id: string) => {
     const next = new Set(openIds)
@@ -168,34 +218,33 @@ export default function InterviewTab({ company }: { company: Company }) {
         title="面接の記録"
         count={company.interviews.length}
         action={
-          <button type="button" className="btn-text" onClick={() => setAdding(true)}>
+          <button type="button" className="btn-text" onClick={() => setEditingId('new')}>
             <Plus size={14} strokeWidth={2.6} />
             面接を追加
           </button>
         }
       >
-        {adding && (
-          <InterviewForm
-            onSave={(draft) => {
-              const id = uid()
-              updateCompany(company.id, (c) => ({
-                ...c,
-                interviews: [...c.interviews, { id, ...draft }],
-              }))
-              setOpenIds((prev) => new Set(prev).add(id))
-              setAdding(false)
-            }}
-            onCancel={() => setAdding(false)}
-          />
+        {editingId === 'new' && (
+          <InterviewForm initial={emptyDraft()} onSave={save} onCancel={() => setEditingId(null)} />
         )}
-  
-        {interviews.length === 0 && !adding ? (
+
+        {interviews.length === 0 && editingId !== 'new' ? (
           <p className="py-2 text-sm text-ink-faint">
             面接の記録はまだありません。終わった面接を振り返って記録しておくと、次の面接に活かせます。
           </p>
         ) : (
           <div className="flex flex-col gap-2.5">
             {interviews.map((iv) => {
+              if (editingId === iv.id) {
+                return (
+                  <InterviewForm
+                    key={iv.id}
+                    initial={draftOf(iv)}
+                    onSave={save}
+                    onCancel={() => setEditingId(null)}
+                  />
+                )
+              }
               const open = openIds.has(iv.id)
               return (
                 <div key={iv.id} className="overflow-hidden rounded-xl border border-line bg-white">
@@ -236,7 +285,15 @@ export default function InterviewTab({ company }: { company: Company }) {
                           {iv.nextNote}
                         </p>
                       )}
-                      <div className="mt-3 flex justify-end">
+                      <div className="mt-3 flex justify-end gap-1.5">
+                        <button
+                          type="button"
+                          className="btn-text"
+                          onClick={() => setEditingId(iv.id)}
+                        >
+                          <Pencil size={13} />
+                          編集
+                        </button>
                         <button
                           type="button"
                           className="btn-text text-danger hover:bg-danger-soft"

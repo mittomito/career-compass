@@ -1,7 +1,7 @@
 import { deleteDoc, doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore'
 import { useEffect, useRef, useState } from 'react'
 import { seedObOgQuestions } from '../data/obogPrep'
-import { db } from '../lib/firebase'
+import { db } from '../lib/db'
 import type { ObOgQuestion } from '../types'
 import { useAuth } from './useAuth'
 
