@@ -12,7 +12,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          # package-lock.json が npm 11（Node 24 同梱）で生成されているため、
+          # npm 10 系（Node 22）では npm ci が同期エラーで失敗する
+          node-version: 24
           cache: npm
       - run: npm ci
       - run: npm run lint
