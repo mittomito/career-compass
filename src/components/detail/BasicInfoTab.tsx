@@ -1,6 +1,7 @@
-import { ExternalLink, Pencil } from 'lucide-react'
+import { ExternalLink, Pencil, Star } from 'lucide-react'
 import { useState } from 'react'
 import { INDUSTRIES, MAX_LEN } from '../../data/constants'
+import AspirationStars from '../common/AspirationStars'
 import CharCount from '../common/CharCount'
 import { useCompanies } from '../../hooks/useCompanies'
 import type { Company, SelectionType } from '../../types'
@@ -18,6 +19,7 @@ export default function BasicInfoTab({ company }: { company: Company }) {
     mypageUrl: company.mypageUrl,
     loginId: company.loginId,
     memo: company.memo,
+    aspiration: company.aspiration,
   })
 
   const startEdit = () => {
@@ -29,6 +31,7 @@ export default function BasicInfoTab({ company }: { company: Company }) {
       mypageUrl: company.mypageUrl,
       loginId: company.loginId,
       memo: company.memo,
+      aspiration: company.aspiration,
     })
     setEditing(true)
   }
@@ -64,6 +67,14 @@ export default function BasicInfoTab({ company }: { company: Company }) {
           <dd className="flex items-center gap-2">
             <span className="tag">{company.type}</span>
             {company.title}
+          </dd>
+          <dt className="pt-px text-[13px] font-bold text-ink-faint">志望度</dt>
+          <dd>
+            {company.aspiration > 0 ? (
+              <AspirationStars value={company.aspiration} size={16} />
+            ) : (
+              <span className="text-ink-faint">未設定</span>
+            )}
           </dd>
           <dt className="pt-px text-[13px] font-bold text-ink-faint">マイページURL</dt>
           <dd>
@@ -158,6 +169,37 @@ export default function BasicInfoTab({ company }: { company: Company }) {
             value={draft.title}
             onChange={(e) => setDraft({ ...draft, title: e.target.value })}
           />
+        </div>
+        <div className="md:col-span-2">
+          <span className="field-label">志望度</span>
+          <div className="flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button
+                key={n}
+                type="button"
+                className="rounded-lg p-1 transition hover:bg-brand-ghost"
+                // 同じ星をもう一度押すと未設定（0）に戻す
+                onClick={() =>
+                  setDraft({ ...draft, aspiration: draft.aspiration === n ? 0 : n })
+                }
+                aria-label={`志望度${n}`}
+                aria-pressed={draft.aspiration >= n}
+              >
+                <Star
+                  size={22}
+                  strokeWidth={1.5}
+                  color={n <= draft.aspiration ? '#D9A400' : '#D3DCE9'}
+                  fill={n <= draft.aspiration ? '#D9A400' : 'none'}
+                />
+              </button>
+            ))}
+            <span className="ml-1.5 text-sm font-semibold text-ink-sub">
+              {draft.aspiration > 0 ? `${draft.aspiration} / 5` : '未設定'}
+            </span>
+          </div>
+          <p className="mt-1 text-xs text-ink-faint">
+            同じ星をもう一度押すと未設定に戻せます。ホームの並び替え「志望度が高い順」で使われます。
+          </p>
         </div>
         <div>
           <label className="field-label">マイページURL</label>

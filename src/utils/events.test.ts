@@ -39,6 +39,8 @@ function makeCompany(over: Partial<Company> = {}): Company {
     rejectionTags: [],
     createdAt: '',
     color: '',
+    aspiration: 0,
+    obogVisits: [],
     ...over,
   }
 }
@@ -117,7 +119,14 @@ describe('buildEvents', () => {
   it('予定をイベントに変換し、日付昇順に並べる', () => {
     const c = makeCompany({
       schedules: [
-        { id: 's1', type: '一次面接', date: new Date(2026, 0, 20, 14, 0).toISOString(), place: '本社' },
+        {
+          id: 's1',
+          type: '一次面接',
+          date: new Date(2026, 0, 20, 14, 0).toISOString(),
+          place: '本社',
+          url: 'https://example.com',
+          memo: '受付で学生証を提示',
+        },
         { id: 's2', type: 'ES提出締切', date: new Date(2026, 0, 18).toISOString() },
       ],
     })
@@ -131,6 +140,9 @@ describe('buildEvents', () => {
       label: '一次面接',
       companyName: 'テスト企業',
       place: '本社',
+      // 週表示・日表示で使う詳細情報もイベントに引き継ぐ
+      url: 'https://example.com',
+      memo: '受付で学生証を提示',
     })
   })
   it('複数候補日の予定は候補日ごとにイベントを作る', () => {

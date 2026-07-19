@@ -28,6 +28,8 @@ function makeCompany(over: Partial<Company> = {}): Company {
     rejectionTags: [],
     createdAt: '',
     color: '',
+    aspiration: 0,
+    obogVisits: [],
     ...over,
   }
 }

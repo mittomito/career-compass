@@ -107,6 +107,8 @@ export function CompaniesProvider({ children }: { children: ReactNode }) {
       rejectionTags: [],
       createdAt: new Date().toISOString(),
       color: '',
+      aspiration: 0,
+      obogVisits: [],
       // Firestore 側にのみ持たせる、データの持ち主を示すフィールド
       ownerId: user.uid,
     } as Omit<Company, 'id'> & { ownerId: string }

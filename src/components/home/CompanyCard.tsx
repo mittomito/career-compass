@@ -4,6 +4,7 @@ import { useCurrentStep } from '../../hooks/useCurrentStep'
 import type { Company } from '../../types'
 import { daysLeft, fmtMD, fmtMDT, relLabel } from '../../utils/date'
 import { nextSchedule } from '../../utils/events'
+import AspirationStars from '../common/AspirationStars'
 import StatusBadge from '../common/StatusBadge'
 
 export default function CompanyCard({ company }: { company: Company }) {
@@ -30,7 +31,13 @@ export default function CompanyCard({ company }: { company: Company }) {
         </p>
 
         <div className="mt-1.5 flex flex-col gap-1">
-          <span className="tag w-fit px-1.5 py-0 text-[10px]">{company.type}</span>
+          <span className="flex items-center gap-1.5">
+            <span className="tag w-fit px-1.5 py-0 text-[10px]">{company.type}</span>
+            {/* 表示が煩雑にならないよう、設定済みのときだけ塗りつぶし星のみ出す */}
+            {company.aspiration > 0 && (
+              <AspirationStars value={company.aspiration} size={10} showEmpty={false} />
+            )}
+          </span>
           <span className="truncate text-[11px] text-ink-sub" title={company.title}>
             {company.title}
           </span>
@@ -64,6 +71,9 @@ export default function CompanyCard({ company }: { company: Company }) {
           <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-ink-sub">
             <span className="tag">{company.type}</span>
             {company.title}
+            {company.aspiration > 0 && (
+              <AspirationStars value={company.aspiration} size={11} showEmpty={false} />
+            )}
           </p>
         </div>
 

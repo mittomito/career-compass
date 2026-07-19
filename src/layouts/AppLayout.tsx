@@ -2,13 +2,16 @@ import {
   BarChart3,
   Briefcase,
   CalendarDays,
+  CircleHelp,
   CircleUserRound,
+  ExternalLink,
   House,
   LogOut,
   Menu,
   MessagesSquare,
   Plus,
   Settings,
+  Users,
   X,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -16,6 +19,7 @@ import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import BrandMark from '../components/common/BrandMark'
 import EmailVerificationBanner from '../components/common/EmailVerificationBanner'
 import LoadErrorState from '../components/common/LoadErrorState'
+import { FEEDBACK_FORM_URL } from '../data/constants'
 import { useAuth } from '../hooks/useAuth'
 import { useCompanies } from '../hooks/useCompanies'
 
@@ -66,7 +70,10 @@ export default function AppLayout() {
             className="flex shrink-0 items-center gap-2 text-[17px] font-extrabold tracking-wide"
           >
             <BrandMark size="sm" />
-            <span className="hidden whitespace-nowrap sm:inline">Career Compass</span>
+            {/* lg〜xl はナビ項目が増えて幅が足りないため、アプリ名はロゴだけにする */}
+            <span className="hidden whitespace-nowrap sm:inline lg:hidden xl:inline">
+              Career Compass
+            </span>
           </Link>
           <div className="flex-1" />
           <nav className="flex items-center gap-1.5 sm:gap-2">
@@ -89,6 +96,10 @@ export default function AppLayout() {
               <NavLink to="/interview-prep" className={navClass}>
                 <MessagesSquare size={16} strokeWidth={2.2} />
                 <span>面接対策</span>
+              </NavLink>
+              <NavLink to="/ob-og-prep" className={navClass}>
+                <Users size={16} strokeWidth={2.2} />
+                <span>OB・OG訪問</span>
               </NavLink>
               <NavLink to="/analysis" className={navClass}>
                 <BarChart3 size={16} strokeWidth={2.2} />
@@ -122,7 +133,22 @@ export default function AppLayout() {
                     onClick={() => setAccountOpen(false)}
                     aria-hidden="true"
                   />
-                  <div className="card absolute right-0 top-[calc(100%+10px)] z-50 flex w-52 flex-col gap-0.5 p-2">
+                  <div className="card absolute right-0 top-[calc(100%+10px)] z-50 flex w-56 flex-col gap-0.5 p-2">
+                    <NavLink to="/help" className={menuItemClass} onClick={() => setAccountOpen(false)}>
+                      <CircleHelp size={16} strokeWidth={2.2} />
+                      ヘルプ・使い方
+                    </NavLink>
+                    <a
+                      href={FEEDBACK_FORM_URL}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-ink-sub transition hover:bg-brand-ghost hover:text-ink"
+                      onClick={() => setAccountOpen(false)}
+                    >
+                      <ExternalLink size={16} strokeWidth={2.2} />
+                      不具合・ご要望はこちら
+                    </a>
+                    <div className="my-1 border-t border-line" />
                     <NavLink to="/account" className={menuItemClass} onClick={() => setAccountOpen(false)}>
                       <Settings size={16} strokeWidth={2.2} />
                       アカウント設定
@@ -182,11 +208,29 @@ export default function AppLayout() {
                   <MessagesSquare size={16} strokeWidth={2.2} />
                   面接対策
                 </NavLink>
+                <NavLink to="/ob-og-prep" className={menuItemClass} onClick={() => setMenuOpen(false)}>
+                  <Users size={16} strokeWidth={2.2} />
+                  OB・OG訪問
+                </NavLink>
                 <NavLink to="/analysis" className={menuItemClass} onClick={() => setMenuOpen(false)}>
                   <BarChart3 size={16} strokeWidth={2.2} />
                   分析
                 </NavLink>
                 <div className="my-1 border-t border-line" />
+                <NavLink to="/help" className={menuItemClass} onClick={() => setMenuOpen(false)}>
+                  <CircleHelp size={16} strokeWidth={2.2} />
+                  ヘルプ・使い方
+                </NavLink>
+                <a
+                  href={FEEDBACK_FORM_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-ink-sub transition hover:bg-brand-ghost hover:text-ink"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <ExternalLink size={16} strokeWidth={2.2} />
+                  不具合・ご要望はこちら
+                </a>
                 <NavLink to="/account" className={menuItemClass} onClick={() => setMenuOpen(false)}>
                   <Settings size={16} strokeWidth={2.2} />
                   アカウント設定

@@ -124,6 +124,37 @@ export interface PrepNode {
   answer: string
 }
 
+/** OB・OG訪問で聞いた質問とその回答のセット */
+export interface ObOgQA {
+  question: string
+  answer: string
+}
+
+/** OB・OG訪問の記録（1回の訪問 = 1件） */
+export interface ObOgVisit {
+  id: string
+  /** 訪問日（ISO 8601 文字列、日付のみ運用） */
+  date: string
+  /** 話を聞いた相手（所属・年次・名前など、書ける範囲で。任意） */
+  person: string
+  /**
+   * 質問と回答のセット。テンプレートから選んでコピーした質問も、手入力の質問も
+   * ここに入り、コピー後はテンプレートから独立したデータとして扱う。
+   * このフィールド追加より前に作られた訪問記録には存在しないため、欠損時は空配列
+   */
+  qas: ObOgQA[]
+  /** 質問に紐づかないその他のメモ（旧データでは「聞いた話」の本文） */
+  memo: string
+  /** その後の選考（ES・面接）に活かせそうなこと（任意） */
+  insight: string
+}
+
+/** OB・OG訪問テンプレート（アカウント共通の「聞くことリスト」）の質問1件 */
+export interface ObOgQuestion {
+  id: string
+  text: string
+}
+
 export interface Company {
   id: string
   name: string
@@ -170,6 +201,13 @@ export interface Company {
   createdAt: string
   /** インターン期間カレンダーの表示色。空文字なら自動割り当て */
   color: string
+  /**
+   * 志望度（1〜5 の5段階）。0 は「未設定」を表すニュートラルな状態。
+   * このフィールド追加より前のドキュメントには存在しないため、欠損時は 0 として扱う
+   */
+  aspiration: number
+  /** OB・OG訪問の記録（訪問日ごとに1件）。旧ドキュメントには存在しない */
+  obogVisits: ObOgVisit[]
   ownerId?: string
 }
 

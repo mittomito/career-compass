@@ -57,6 +57,16 @@ export function normalizeCompany(id: string, data: StoredCompany): Company {
     rejectionTags: data.rejectionTags ?? [],
     createdAt: data.createdAt ?? '',
     color: data.color ?? '',
+    aspiration: data.aspiration ?? 0,
+    // qas はフィールド追加より前の訪問記録に存在しないため、訪問1件ずつ補完する
+    obogVisits: (data.obogVisits ?? []).map((v) => ({
+      id: v.id,
+      date: v.date,
+      person: v.person ?? '',
+      qas: v.qas ?? [],
+      memo: v.memo ?? '',
+      insight: v.insight ?? '',
+    })),
     ownerId: data.ownerId,
   }
 }

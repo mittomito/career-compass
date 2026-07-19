@@ -9,6 +9,9 @@ export interface CalendarEvent {
   companyId: string
   companyName: string
   place?: string
+  /** 週表示・日表示など、月表示より詳しい画面でだけ使う */
+  memo?: string
+  url?: string
 }
 
 export function kindOf(label: string): EventKind {
@@ -57,6 +60,8 @@ export function buildEvents(companies: Company[]): CalendarEvent[] {
           companyId: c.id,
           companyName: c.name,
           place: s.place,
+          memo: s.memo,
+          url: s.url,
         })
       })
     }

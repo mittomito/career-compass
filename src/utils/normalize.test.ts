@@ -15,6 +15,8 @@ describe('normalizeCompany', () => {
     expect(c.rejectionTags).toEqual([])
     expect(c.createdAt).toBe('')
     expect(c.color).toBe('')
+    expect(c.aspiration).toBe(0)
+    expect(c.obogVisits).toEqual([])
     for (const cat of RESEARCH_CATEGORIES) {
       expect(c.research[cat]).toEqual({ url: '', summary: '', memo: '' })
     }
@@ -42,6 +44,39 @@ describe('normalizeCompany', () => {
     expect(c.rejectedStepId).toBeNull()
     expect(c.rejectionTags).toEqual([])
     expect(c.createdAt).toBe('')
+  })
+
+  it('志望度・OB・OG訪問を持つドキュメントは値をそのまま保持する', () => {
+    const c = normalizeCompany('id1', {
+      aspiration: 4,
+      obogVisits: [
+        {
+          id: 'v1',
+          date: '2026-07-01T00:00:00.000Z',
+          person: '営業部の方',
+          qas: [{ question: '入社の決め手は？', answer: '人のよさ' }],
+          memo: '話',
+          insight: '',
+        },
+      ],
+    })
+    expect(c.aspiration).toBe(4)
+    expect(c.obogVisits).toHaveLength(1)
+    expect(c.obogVisits[0].person).toBe('営業部の方')
+    expect(c.obogVisits[0].qas).toHaveLength(1)
+  })
+
+  it('qas を持たない旧形式のOB・OG訪問記録も安全に読み込める', () => {
+    const c = normalizeCompany('id1', {
+      obogVisits: [
+        // qas フィールド追加より前に保存された訪問記録
+        { id: 'v1', date: '2026-07-01T00:00:00.000Z', person: '', memo: '聞いた話', insight: '活かす' } as never,
+      ],
+    })
+    expect(c.obogVisits).toHaveLength(1)
+    expect(c.obogVisits[0].qas).toEqual([])
+    expect(c.obogVisits[0].memo).toBe('聞いた話')
+    expect(c.obogVisits[0].insight).toBe('活かす')
   })
 
   it('旧「締切」を予定に変換して統合する', () => {

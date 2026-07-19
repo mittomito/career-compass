@@ -6,6 +6,7 @@ import BasicInfoTab from '../components/detail/BasicInfoTab'
 import EsTab from '../components/detail/EsTab'
 import InterviewPrepTab from '../components/detail/InterviewPrepTab'
 import InterviewTab from '../components/detail/InterviewTab'
+import ObOgTab from '../components/detail/ObOgTab'
 import ResearchTab from '../components/detail/ResearchTab'
 import SelectionTab from '../components/detail/SelectionTab'
 import { useCompanies } from '../hooks/useCompanies'
@@ -20,6 +21,8 @@ const TABS = [
   // 旧「面接」タブ。既存リンク（?tab=interview）を壊さないよう key は変えない
   { key: 'interview', label: '振り返り' },
   { key: 'research', label: '企業研究' },
+  // 企業研究と同じ「情報収集系」なので隣に並べる（既存タブの並びは変えない）
+  { key: 'obog', label: 'OB・OG訪問' },
 ] as const
 type TabKey = (typeof TABS)[number]['key']
 
@@ -149,6 +152,7 @@ export default function CompanyDetailPage() {
         {tab === 'prep' && <InterviewPrepTab company={company} />}
         {tab === 'interview' && <InterviewTab company={company} />}
         {tab === 'research' && <ResearchTab company={company} />}
+        {tab === 'obog' && <ObOgTab company={company} />}
       </div>
     </div>
   )

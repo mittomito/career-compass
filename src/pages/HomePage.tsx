@@ -31,6 +31,13 @@ export default function HomePage() {
     const nextTime = (t?: { date: string }) => (t ? new Date(t.date).getTime() : FAR_FUTURE)
     if (sort === 'next') result.sort((a, b) => nextTime(nextSchedule(a)) - nextTime(nextSchedule(b)))
     if (sort === 'name') result.sort((a, b) => a.name.localeCompare(b.name, 'ja'))
+    // 志望度が同じ（未設定同士を含む）企業は、次回予定が近い順で並べる
+    if (sort === 'aspiration')
+      result.sort(
+        (a, b) =>
+          b.aspiration - a.aspiration ||
+          nextTime(nextSchedule(a)) - nextTime(nextSchedule(b)),
+      )
     return result
   }, [companies, query, typeFilter, statuses, sort])
 

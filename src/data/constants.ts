@@ -87,6 +87,9 @@ export const MAX_LEN = {
   answer: 5000,
 } as const
 
+/** 不具合・要望の報告用 Google フォーム（新しいタブで開く） */
+export const FEEDBACK_FORM_URL = 'https://forms.gle/5n2HQtQeNgYRvmQj9'
+
 export const INDUSTRIES = [
   'IT・通信',
   'メーカー',
